@@ -2,8 +2,8 @@ import { PlusCircle, UserPlus, Gamepad2 } from "lucide-react";
 
 function HowItWorks() {
     return (
-        <section className="max-w-7xl mx-auto px-8 py-24">
-            <h2 className="text-4xl font-bold">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <h2 className="text-3xl md:text-4xl font-bold">
                 How It Works
             </h2>
 
@@ -30,13 +30,13 @@ function HowItWorks() {
                 />
 
                 {/* First Step */}
-                <div className="relative z-10 w-full rounded-2xl bg-[#111827] border border-slate-700 shadow-2xl p-8">
+                <div className="group relative z-10 w-full rounded-2xl bg-[#111827] border border-slate-700 shadow-2xl p-6 lg:p-8 hover:-translate-y-2 hover:border-cyan-400 transition-all duration-300 will-change-transform">
                     <span className="absolute top-3 left-5 text-5xl font-extrabold text-cyan-400/5 select-none">
                         01
                     </span>
 
                     <div className="relative z-10 mt-10">
-                        <div className="ml-4 w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+                        <div className="ml-4 w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                             <PlusCircle className="w-8 h-8 text-cyan-400" />
                         </div>
 
@@ -51,18 +51,18 @@ function HowItWorks() {
                 </div>
 
                 {/* Second Step */}
-                <div className="relative z-10 w-full rounded-2xl bg-[#111827] border border-slate-700 shadow-2xl p-8">
+                <div className="group relative z-10 w-full rounded-2xl bg-[#111827] border border-slate-700 shadow-2xl p-6 lg:p-8 hover:-translate-y-2 hover:border-cyan-400 transition-all duration-300 will-change-transform">
                     <span className="absolute top-3 left-5 text-5xl font-extrabold text-cyan-400/5 select-none">
                         02
                     </span>
 
                     <div className="relative z-10 mt-10">
-                        <div className="ml-4 w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+                        <div className="ml-4 w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                             <UserPlus className="w-8 h-8 text-cyan-400" />
                         </div>
 
                         <h3 className="mt-6 text-2xl font-semibold">
-                            Invite your Friends
+                            Invite Friends
                         </h3>
 
                         <p className="mt-3 text-slate-400 leading-relaxed">
@@ -72,13 +72,13 @@ function HowItWorks() {
                 </div>
 
                 {/* Third Step */}
-                <div className="relative z-10 w-full rounded-2xl bg-[#111827] border border-slate-700 shadow-2xl p-8">
+                <div className="group relative z-10 w-full rounded-2xl bg-[#111827] border border-slate-700 shadow-2xl p-6 lg:p-8 hover:-translate-y-2 hover:border-cyan-400 transition-all duration-300 will-change-transform">
                     <span className="absolute top-3 left-5 text-5xl font-extrabold text-cyan-400/5 select-none">
                         03
                     </span>
 
                     <div className="relative z-10 mt-10">
-                        <div className="ml-4 w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+                        <div className="ml-4 w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                             <Gamepad2 className="w-8 h-8 text-cyan-400" />
                         </div>
 

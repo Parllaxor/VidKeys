@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 
 function Hero() {
     return (
-        <section className="max-w-7xl mx-auto px-8 py-24">
-            <div className="flex items-center justify-between">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
 
                 {/* Left Side Hero */}
-                <div className="max-w-xl space-y-6">
-                    <h1 className="text-5xl font-bold text-white leading-tight">
+                <div className="max-w-xl space-y-6 text-center lg:text-left">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
                         Your place to connect...
                         <br />
                         No matter where you are.
@@ -16,7 +16,7 @@ function Hero() {
                         Connect with your friends and family in a fun and engaging way.
                     </p>
 
-                    <div className="flex gap-4">
+                    <div className="flex justify-center lg:justify-start gap-4">
                         <Link to="/register" className="px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-600 transition-colors duration-300 font-semibold">
                             Get Started
                         </Link>
@@ -28,7 +28,7 @@ function Hero() {
                 </div>
 
                 {/* Right Side Hero */}
-                <div className="w-[450px] rounded-3xl bg-[#111827] border border-slate-700 shadow-2xl">
+                <div className="w-full max-w-[450px] rounded-3xl bg-[#111827] border border-slate-700 shadow-2xl">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-slate-700">
                         <div>

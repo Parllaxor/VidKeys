@@ -1,14 +1,23 @@
 import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
-function Navbar() {
+interface NavbarProps {
+    menuOpen: boolean;
+    setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function Navbar({
+    menuOpen,
+    setMenuOpen,
+}: NavbarProps) {
     return (
-        <nav className="flex items-center justify-between h-20 max-w-7xl mx-auto px-8 border-b border-[#2A2E38]">
+        <nav className="sticky top-0 z-30 flex items-center justify-between h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#2A2E38] md:static">
             <Link to="/">
                 <span className="text-2xl font-extrabold text-cyan-400">Vid</span>
                 <span className="text-2xl font-extrabold text-[#F2F2F2]">Keys</span>
             </Link>
 
-            <div className="flex gap-8 text-slate-300">
+            <div className="hidden lg:flex gap-8 text-slate-300">
                 <Link to="/features" className="group hover:text-cyan-400 transition-colors duration-300">
                     <span className="relative inline-block">
                         Features
@@ -59,7 +68,7 @@ function Navbar() {
                 </Link>
             </div>
 
-            <div className="flex gap-8 text-slate-300">
+            <div className="hidden lg:flex gap-8 text-slate-300">
                 <Link to="/login"
                 className="px-4 py-2 rounded-md hover:bg-slate-700 hover:text-cyan-400 transition-colors duration-200"
                 >
@@ -71,6 +80,17 @@ function Navbar() {
                     <span>Register</span>
                 </Link>
             </div>
+
+            <button 
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="lg:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors"
+            >
+                {menuOpen ? (
+                    <X className="w-7 h-7 text-slate-300" />
+                ) : (
+                    <Menu className="w-7 h-7 text-slate-300" />
+                )}
+            </button>
         </nav>
     );
 }
