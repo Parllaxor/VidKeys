@@ -9,6 +9,7 @@ function Hero() {
                 <div className="max-w-xl space-y-6">
                     <h1 className="text-5xl font-bold text-white leading-tight">
                         Your place to connect...
+                        <br />
                         No matter where you are.
                     </h1>
                     <p className="text-lg text-slate-300 max-w-2xl">

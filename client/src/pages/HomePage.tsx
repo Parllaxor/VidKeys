@@ -3,6 +3,8 @@ import Hero from "../components/Hero";
 import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
 import WhyVidkeys from "../components/WhyVidkeys";
+import Story from "../components/Story";
+import CTA from "../components/CTA";
 
 function HomePage() {
     return (
@@ -11,6 +13,8 @@ function HomePage() {
             <Features />
             <HowItWorks />
             <WhyVidkeys />
+            <Story />
+            <CTA />
         </MainLayout>
     );
 }

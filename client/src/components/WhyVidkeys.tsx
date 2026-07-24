@@ -1,4 +1,4 @@
-import { Home, Users, Gamepad2, Video, MessageCircle } from "lucide-react";
+import { Home, Users, Gamepad2, Video, MessageCircle, Rocket, Telescope, Trophy, Cat, Bed, TreePalm } from "lucide-react";
 
 function WhyVidkeys() {
     return (
@@ -29,8 +29,8 @@ function WhyVidkeys() {
 
                         {/* Benefits */}
                         <div className="mt-8 space-y-6">
-                            <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Home className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -46,8 +46,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Users className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -63,8 +63,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Gamepad2 className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -80,8 +80,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Video className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -97,8 +97,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <MessageCircle className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -123,6 +123,103 @@ function WhyVidkeys() {
                     </div>
 
                     {/* Right Side */}
+
+                    <div className="rounded-3xl bg-slate-900/50 border-slate-700 shadow-xl overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+                            <div>
+                                <h3 className="text-xl font-semibold">
+                                    My Room
+                                </h3>
+
+                                <p className="text-sm text-slate-400">
+                                    Personalized Space
+                                </p>
+                            </div>
+
+                            <div className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-sm font-medium">
+                                Customizable
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            {/* Details */}
+                            <div>
+                                <p className="text-sm uppercase tracking-wide text-slate-500">
+                                    Theme
+                                </p>
+
+                                <div className="mt-1">
+                                    <p className="text-lg font-medium">
+                                        Midnight Galaxy
+                                    </p>
+                                    <p className="text-md font-medium text-[#595959]">
+                                        Fantasy Woods
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-sm uppercase tracking-wide text-slate-500">
+                                    Ambience
+                                </p>
+
+                                <div className="mt-1">
+                                    <p className="text-lg font-medium">
+                                        Rainy Evening
+                                    </p>
+                                    <p className="text-md font-medium text-[#595959]">
+                                        Winter Wonderland
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-sm uppercase tracking-wide text-slate-500">
+                                    Favorite Activity
+                                </p>
+
+                                <div className="mt-1">
+                                    <p className="text-lg font-medium">
+                                        Game Night
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-slate-700 pt-6">
+                                <p className="text-sm uppercase tracking-wide text-slate-500">
+                                    Decorations
+                                </p>
+
+                                <div className="mt-4 flex gap-3">
+                                    {/* Icons */}
+                                    <div className="p-2 rounded-lg hover:bg-cyan-500/10 transition-all duration-300">
+                                        <Rocket className="w-4 h-4 text-cyan-400" />
+                                    </div>
+                                    <div className="p-2 rounded-lg hover:bg-cyan-500/10 transition-all duration-300">
+                                        <Telescope className="w-4 h-4 text-cyan-400" />
+                                    </div>
+                                    <div className="p-2 rounded-lg hover:bg-cyan-500/10 transition-all duration-300">
+                                        <Trophy className="w-4 h-4 text-cyan-400" />
+                                    </div>
+                                    <div className="p-2 rounded-lg hover:bg-cyan-500/10 transition-all duration-300">
+                                        <Cat className="w-4 h-4 text-cyan-400" />
+                                    </div>
+                                    <div className="p-2 rounded-lg hover:bg-cyan-500/10 transition-all duration-300">
+                                        <Bed className="w-4 h-4 text-cyan-400" />
+                                    </div>
+                                    <div className="p-2 rounded-lg hover:bg-cyan-500/10 transition-all duration-300">
+                                        <TreePalm className="w-4 h-4 text-cyan-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-slate-700 p-6">
+                                <p className="text-slate-300 italic">
+                                    "Friends can always stop by."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
