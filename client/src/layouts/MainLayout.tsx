@@ -1,4 +1,5 @@
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer"
 
 import type { ReactNode } from "react";
 import {useState} from "react";
@@ -47,7 +48,7 @@ function MainLayout({ children }: Props) {
                     >
                         <X className="w-6 h-6 text-slate-300" />
                     </button>
-                    
+
                     <div className="mb-12">
                         <h2 className="text-2xl font-bold tracking-wide">
                             <span className="text-cyan-400">Vid</span>
@@ -139,6 +140,8 @@ function MainLayout({ children }: Props) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {children}
                 </div>
+
+                <Footer />
             </div>
         </main>
     );
