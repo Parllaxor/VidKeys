@@ -1,13 +1,28 @@
 import DecorationRenderer from "./DecorationRenderer";
 import type { Room } from "../room/room";
+import type { Dispatch, SetStateAction } from "react";
+import { useState } from "react";
+import type { RoomPreset } from "../room/presets";
 
 interface Props {
     room: Room;
+    setRoom: Dispatch<SetStateAction<Room>>;
+    presets: RoomPreset[];
 }
 
-function RoomPreview({ room }: Props) {
+function RoomPreview({ room, setRoom, presets }: Props) {
+
+    const [draggingId, setDraggingId] = useState<string | null>(null);
+    const [dragOffset, setDragOffset] = useState({
+        x: 0,
+        y: 0,
+    });
+    const [hasDragged, setHasDragged] = useState(false);
 
     const theme = room.theme;
+    const activePreset = presets.find(
+        (preset) => preset.id === room.activePresetId
+    );
 
     return (
         <section
@@ -45,7 +60,7 @@ function RoomPreview({ room }: Props) {
                         text-sm
                     "
                 >
-                    {theme.name}
+                    {activePreset?.name ?? "Custom Room"}
                 </span>
             </div>
 
@@ -58,8 +73,47 @@ function RoomPreview({ room }: Props) {
                 border-[#2A2E38]
                 bg-[#0B0B0F]
                 overflow-hidden
-            ">
-                <div className="flex flex-col w-full h-[350px]">
+                "
+                onClick={() => {
+                    if (!hasDragged) {
+                        setRoom({
+                            ...room,
+                            selectedDecorationId: null,
+                        });
+                    }
+
+                    setHasDragged(false);
+                }}
+                onMouseMove={(event) => {
+                    if (!draggingId) return;
+
+                    setHasDragged(true);
+
+                    const rect = event.currentTarget.getBoundingClientRect();
+
+                    const x = event.clientX - rect.left - dragOffset.x;
+                    const y = event.clientY - rect.top - dragOffset.y;
+
+                    setRoom({
+                        ...room,
+                        activePresetId: null,
+                        decorations: room.decorations.map((decoration) =>
+                            decoration.id === draggingId
+                                ? {
+                                    ...decoration,
+                                    x,
+                                    y,
+                                }
+                                : decoration
+                        ),
+                    });
+                }}
+                onMouseUp={() => {
+                    setDraggingId(null);
+                }}
+                >
+
+                <div className="relative flex flex-col w-full h-[400px]">
                     {/* Wall */}
                     <div className="relative flex-1 rounded-t-xl"
                             style={{
@@ -67,8 +121,34 @@ function RoomPreview({ room }: Props) {
                             }}>
                             
                             {room.decorations.map((decoration) => (
-                                <div key={decoration.id}
-                                    className="absolute"
+                                <div 
+                                    key={decoration.id}
+                                    className={`
+                                        absolute
+                                        rounded-md
+                                        ${draggingId === decoration.id ? "cursor-grabbing" : "cursor-grab"}
+                                        ${
+                                            room.selectedDecorationId === decoration.id
+                                                ? "ring-2 ring-cyan-400"
+                                                : ""
+                                        }
+                                    `}
+                                    onMouseDown={(event) => {
+                                        event.stopPropagation();
+
+                                        setHasDragged(false);
+                                        setDraggingId(decoration.id);
+
+                                        setDragOffset({
+                                            x: event.nativeEvent.offsetX,
+                                            y: event.nativeEvent.offsetY,
+                                        });
+
+                                        setRoom({
+                                            ...room,
+                                            selectedDecorationId: decoration.id,
+                                        });
+                                    }}
                                     style={{
                                         left: decoration.x,
                                         top: decoration.y,
@@ -88,6 +168,13 @@ function RoomPreview({ room }: Props) {
                             }}>
 
                     </div>
+
+                    <div className="absolute inset-0 pointer-events-none"
+                        style={{
+                            backgroundColor: room.ambience.overlayColor,
+                            opacity: room.ambience.overlayOpacity,
+                        }}
+                    />
                 </div>
             </div>
         </section>

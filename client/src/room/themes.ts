@@ -22,8 +22,22 @@ export const cyberTheme: RoomTheme = {
     floorColor: "#1f2937",
 };
 
+export const forestTheme: RoomTheme = {
+    name: "Forest",
+    wallColor: "#8AA356",
+    floorColor: "#495630",
+}
+
+export const beachTheme: RoomTheme = {
+    name: "Beach",
+    wallColor: "#87CEEB",
+    floorColor: "#F4D28A",
+};
+
 export const themes = [
     defaultTheme,
     cozyTheme,
     cyberTheme,
+    forestTheme,
+    beachTheme,
 ];

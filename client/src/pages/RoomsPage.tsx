@@ -1,12 +1,44 @@
 import AppLayout from "../layouts/AppLayout";
 import RoomPreview from "../components/RoomPreview";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { currentRoom } from "../room/room";
-import { cozyTheme } from "../room/themes";
+import RoomCustomizer from "../components/RoomCustomizer";
+import { defaultPresets } from "../room/presets"
 
 function RoomsPage() {
-    const [room, setRoom] = useState(currentRoom);
+    const [presets, setPresets] = useState(() => {
+        const savedPresets = localStorage.getItem("vidkeys-presets");
+
+        if (savedPresets) {
+            return JSON.parse(savedPresets);
+        }
+
+        return defaultPresets;
+    });
+    const [room, setRoom] = useState(() => {
+        const savedRoom = localStorage.getItem("vidkeys-room");
+
+        if (savedRoom) {
+            return JSON.parse(savedRoom);
+        }
+
+        return currentRoom;
+    });
+
+    useEffect(() => {
+        localStorage.setItem(
+            "vidkeys-room",
+            JSON.stringify(room)
+        );
+    }, [room]);
+
+    useEffect(() => {
+        localStorage.setItem(
+            "vidkeys-presets",
+            JSON.stringify(presets)
+        );
+    }, [presets]);
 
     return (
         <AppLayout>
@@ -20,27 +52,20 @@ function RoomsPage() {
                 </p>
 
                 <div className="mt-8">
-                    <RoomPreview room={room} />
+                    <RoomPreview 
+                        room={room}
+                        setRoom={setRoom} 
+                        presets={presets}
+                    />
                 </div>
 
                 <div className="mt-6">
-                    <button
-                        onClick={() => {
-                            setRoom({
-                                ...room,
-                                theme: cozyTheme,
-                            });
-                        }}
-                        className="
-                            bg-cyan-400
-                            text-black
-                            px-4
-                            py-2
-                            rounded-lg
-                        "
-                    >
-                        Change Theme
-                    </button>
+                    <RoomCustomizer
+                        room={room}
+                        setRoom={setRoom}
+                        presets={presets}
+                        setPresets={setPresets}
+                    />
                 </div>
             </div>
         </AppLayout>
