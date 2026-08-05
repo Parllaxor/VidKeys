@@ -1,7 +1,8 @@
 import DecorationRenderer from "./DecorationRenderer";
+import SelectionOutline from "./SelectionOutline";
 import type { Room } from "../room/room";
 import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { RoomPreset } from "../room/presets";
 
 interface Props {
@@ -18,11 +19,58 @@ function RoomPreview({ room, setRoom, presets }: Props) {
         y: 0,
     });
     const [hasDragged, setHasDragged] = useState(false);
+    const roomRef = useRef<HTMLDivElement | null>(null);
 
     const theme = room.theme;
     const activePreset = presets.find(
         (preset) => preset.id === room.activePresetId
     );
+    const wallDecorations = room.decorations.filter(
+        (decoration) => decoration.layer <= 3
+    );
+    const furniture = room.decorations.filter(
+        (decoration) => decoration.layer > 3
+    );
+
+    useEffect(() => {
+        const roomElement = roomRef.current;
+
+        if (!roomElement) return;
+
+        function handleWheel(event: WheelEvent) {
+            
+            event.preventDefault();
+            const rotationAmount = event.deltaY < 0 ? 2 : -2;
+
+            setRoom((currentRoom) => {
+                if (!currentRoom.selectedDecorationId) {
+                    return currentRoom;
+                }
+
+            return {
+                    ...currentRoom,
+                activePresetId: null,
+                decorations: currentRoom.decorations.map((decoration) =>
+                    decoration.id === currentRoom.selectedDecorationId
+                        ? {
+                            ...decoration,
+                            rotation: decoration.rotation + rotationAmount,
+                        }
+                        : decoration
+                    )
+                };
+            });
+        }
+
+        roomElement.addEventListener("wheel", handleWheel, {
+            passive: false,
+        });
+
+        return () => {
+            roomElement.removeEventListener("wheel", handleWheel);
+        };
+
+    }, [setRoom]);
 
     return (
         <section
@@ -74,6 +122,7 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                 bg-[#0B0B0F]
                 overflow-hidden
                 "
+                ref={roomRef}
                 onClick={() => {
                     if (!hasDragged) {
                         setRoom({
@@ -110,18 +159,37 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                 }}
                 onMouseUp={() => {
                     setDraggingId(null);
-                }}
-                >
+                }} >
 
                 <div className="relative flex flex-col w-full h-[400px]">
                     {/* Wall */}
                     <div className="relative flex-1 rounded-t-xl"
                             style={{
                                 backgroundColor: theme.wallColor,
+                                filter: `brightness(${room.ambience.wallBrightness})`,
                             }}>
-                            
-                            {room.decorations.map((decoration) => (
-                                <div 
+
+                            {wallDecorations.map((window) => (
+                                <div
+                                    key={`${window.id}-glow`}
+                                    className="absolute pointer-events-none z-0"
+                                    style={{
+                                        left: window.x - 60,
+                                        top: window.y - 40,
+                                        width: window.width + 120,
+                                        height: window.height + 180,
+                                        background: `radial-gradient(
+                                            ellipse at center top,
+                                            ${room.ambience.glowColor} 0%,
+                                            transparent 70%
+                                        )`,
+                                        opacity: room.ambience.glowOpacity,
+                                    }}
+                                />
+                            ))}
+
+                            {wallDecorations.map((decoration) => (
+                                <div
                                     key={decoration.id}
                                     className={`
                                         absolute
@@ -154,8 +222,19 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                                         top: decoration.y,
                                         width: decoration.width,
                                         height: decoration.height,
-                                    }}>
-                                        <DecorationRenderer decoration={decoration} />
+                                        transform: `rotate(${decoration.rotation}deg)
+                                                    scale(${decoration.scaleX}, ${decoration.scaleY})`,
+                                    }}
+                                >
+                                    <DecorationRenderer decoration={decoration} />
+
+                                    <SelectionOutline
+                                        decoration={decoration}
+                                        selected={room.selectedDecorationId === decoration.id}
+                                        room={room}
+                                        setRoom={setRoom}
+                                        roomRef={roomRef}
+                                    />
                                 </div>
                             ))}
 
@@ -165,9 +244,64 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                     <div className="h-24 rounded-b-xl"
                             style={{
                                 backgroundColor: theme.floorColor,
+                                filter: `brightness(${room.ambience.floorBrightness})`,
+                            }}>
+                    </div>
+
+                    {/* Decorations */}
+                    {furniture.map((decoration) => (
+                        <div 
+                            key={decoration.id}
+                            className={`
+                                absolute
+                                rounded-md
+                                ${draggingId === decoration.id ? "cursor-grabbing" : "cursor-grab"}
+                                ${
+                                    room.selectedDecorationId === decoration.id
+                                        ? "ring-2 ring-cyan-400"
+                                        : ""
+                                }
+                            `}
+                            onMouseDown={(event) => {
+                                event.stopPropagation();
+
+                                setHasDragged(false);
+                                setDraggingId(decoration.id);
+
+                                setDragOffset({
+                                    x: event.nativeEvent.offsetX,
+                                    y: event.nativeEvent.offsetY,
+                                });
+
+                                setRoom({
+                                    ...room,
+                                    selectedDecorationId: decoration.id,
+                                });
                             }}>
 
-                    </div>
+                            <div className="absolute"
+                                style={{
+                                    left: decoration.x,
+                                    top: decoration.y,
+                                    width: decoration.width,
+                                    height: decoration.height,
+                                    zIndex: decoration.layer,
+                                    transform: `rotate(${decoration.rotation}deg)
+                                                scale(${decoration.scaleX}, ${decoration.scaleY})
+                                                `,
+                                }}>
+                                    <DecorationRenderer decoration={decoration} />
+                            
+                                    <SelectionOutline 
+                                        decoration={decoration}
+                                        selected={room.selectedDecorationId === decoration.id}
+                                        room={room}
+                                        setRoom={setRoom}
+                                        roomRef={roomRef}
+                                    />
+                            </div>
+                        </div>
+                    ))}
 
                     <div className="absolute inset-0 pointer-events-none"
                         style={{

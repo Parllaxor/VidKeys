@@ -5,7 +5,11 @@ export interface Decoration {
     y: number;
     width: number;
     height: number;
+    rotation: number;
+    scaleX: number;
+    scaleY: number;
     color: string;
+    layer: number;
 }
 
 export const couch: Decoration = {
@@ -15,7 +19,11 @@ export const couch: Decoration = {
     y: 210,
     width: 120,
     height: 50,
+    rotation: 0,
+    scaleX: 1,
+    scaleY: 1,
     color: "#475569",
+    layer: 10,
 };
 
 export const window: Decoration = {
@@ -25,7 +33,11 @@ export const window: Decoration = {
     y: 40,
     width: 70,
     height: 90,
+    rotation: 0,
+    scaleX: 1,
+    scaleY: 1,
     color: "#60A5FA",
+    layer: 1,
 };
 
 export const plant: Decoration = {
@@ -35,7 +47,11 @@ export const plant: Decoration = {
     y: 210,
     width: 30,
     height: 80,
+    rotation: 0,
+    scaleX: 1,
+    scaleY: 1,
     color: "#13d313",
+    layer: 10,
 };
 
 export function createDecoration(
@@ -56,7 +72,11 @@ export function createDecoration(
                 y: spawnY,
                 width: 120,
                 height: 50,
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1,
                 color: "#475569",
+                layer: 10,
             };
 
         case "window":
@@ -67,7 +87,11 @@ export function createDecoration(
                 y: spawnY,
                 width: 70,
                 height: 90,
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1,
                 color: "#60A5FA",
+                layer: 1,
             };
 
         case "plant":
@@ -78,7 +102,11 @@ export function createDecoration(
                 y: spawnY,
                 width: 30,
                 height: 80,
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1,
                 color: "#22C55E",
+                layer: 10,
             };
     }
 }

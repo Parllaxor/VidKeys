@@ -123,7 +123,8 @@ function Sidebar () {
             {/* Profile */}
             <div className="mt-auto border-t border-[#2A2E38] p-6">
                 
-                <Link to="/profile"
+                <NavLink 
+                    to="/profile"
                     className="
                     flex
                     items-center
@@ -155,7 +156,7 @@ function Sidebar () {
                             View Profile
                         </p>
                     </div>
-                </Link>
+                </NavLink>
             </div>
 
         </section>
