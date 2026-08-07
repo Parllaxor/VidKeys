@@ -1,16 +1,32 @@
 import { getUserById } from "../users/userDatabase";
+import { getAvatarById } from "../users/avatars";
 import { User, CalendarDays, MessageCircle, Users, Sparkles } from "lucide-react";
+import { useState } from "react";
+import ProfileEditor from "./ProfileEditor";
 
 function Profile() {
+
     const user = getUserById("test");
 
     if (!user) {
         return <div>ERROR: User not found</div>;
     }
 
+    const avatar = getAvatarById(user.avatarId);
     const lastActive = new Date(user.lastActive).toLocaleString();
     const joinedAt = new Date(user.createdAt).toLocaleDateString();
     const updatedAt = new Date(user.updatedAt).toLocaleDateString();
+
+    const [editing, setEditing] = useState(false);
+
+    if (editing) {
+        return (
+            <ProfileEditor 
+                user={user}
+                onClose={() => setEditing(false)}
+            />
+        )
+    }
 
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -19,7 +35,15 @@ function Profile() {
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex items-center gap-5">
                             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
-                                <User className="h-12 w-12 text-cyan-400" />
+                                {avatar ? (
+                                    <img
+                                        src={avatar.image}
+                                        alt={avatar.name}
+                                        className="h-24 w-24 rounded-full object-cover"
+                                        />
+                                ) : (
+                                    <User className="h-12 w-12 text-slate-400" />
+                                )}
                             </div>
 
                             <div>
@@ -48,7 +72,9 @@ function Profile() {
                                 <Sparkles className="w-4 h-4" />
                                 {user.status.toUpperCase()}
                             </span>
-                            <button className="rounded-full bg-cyan-400 px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-cyan-300">
+                            <button 
+                                onClick={() => setEditing(true)}
+                                className="rounded-full bg-cyan-400 px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-cyan-300">
                                 Edit Profile
                             </button>
                         </div>
@@ -152,7 +178,9 @@ function Profile() {
                             </div>
 
                             <div className="mt-6 grid gap-3">
-                                <button className="rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-black transition hover:bg-cyan-300">
+                                <button 
+                                    onClick={() => setEditing(true)}
+                                    className="rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-black transition hover:bg-cyan-300">
                                     Customize profile
                                 </button>
                                 <button className="rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300">
