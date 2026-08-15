@@ -1,24 +1,59 @@
 import type { User } from "../users/user";
+import { User as UserIcon } from "lucide-react";
 import { useState } from "react";
-import { updateUser } from "../users/userDatabase";
-import { avatars } from "../users/avatars";
+import { useNavigate } from "react-router-dom";
+import { getAvatarById } from "../users/avatars";
 
 interface Props {
     user: User;
     onClose: () => void;
+    onSave: (updatedUser: User) => void;
 }
 
-function ProfileEditor({ user, onClose }: Props) {
+function ProfileEditor({ user, onClose, onSave }: Props) {
 
+    const navigate = useNavigate();
     const [displayName, setDisplayName] = useState(user.displayName);
     const [displayBio, setBio] = useState(user.bio);
-    const [avatarId, setAvatarId] = useState(user.avatarId);
+
+    const avatar = getAvatarById(user.avatarId);
+    const avatarImage = user.avatarUrl ?? avatar?.image;
+
+    const handleSave = () => {
+        const updatedUser: User = {
+            ...user,
+            displayName,
+            bio: displayBio,
+            updatedAt: Date.now(),
+        };
+
+        onSave(updatedUser);
+        onClose();
+    };
 
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="mt-2 rounded-3xl border border-slate-700 bg-slate-950/60 p-8">
-                <h2 className="text-3xl font-bold text-white mb-4">Edit Profile</h2>
-                <p className="text-md text-white mb-4">Update your profile information.</p>
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+                    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
+                        {avatarImage ? (
+                            <img
+                                src={avatarImage}
+                                alt={avatar?.name ?? "Profile avatar"}
+                                className="h-24 w-24 rounded-full object-cover"
+                            />
+                        ) : (
+                            <UserIcon className="h-12 w-12 text-slate-400" />
+                        )}
+                    </div>
+
+                    <div>
+                        <h2 className="text-3xl font-bold text-white">Edit Profile</h2>
+                        <p className="mt-2 text-md text-slate-400">
+                            Update your profile information.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div className="mt-4 rounded-3xl border border-slate-700 bg-slate-950/60 p-8">
@@ -78,56 +113,28 @@ function ProfileEditor({ user, onClose }: Props) {
                 </div>
             </div>
 
-            <div className="mt-4 rounded-3xl border border-slate-700 bg-slate-950/60 p-8">
-                <h3 className="text-lg font-semibold text-white mb-4">
-                    Choose an Avatar
-                </h3>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                <button
+                    onClick={() => navigate("/profile/avatar")}
+                    className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-400/20"
+                >
+                    Choose avatar
+                </button>
 
-                {/* Avatar grid here */}
-                <div className="grid grid-cols-4 gap-4">
-                    {avatars.map((avatar) => (
-                        <button
-                            className={`rounded-full border-2 p-1 transition ${
-                                avatar.id === avatarId
-                                    ? "border-cyan-400"
-                                    : "border-slate-700 hover:border-slate-500"
-                            }`}
-                            onClick={() => setAvatarId(avatar.id)}
-                        >
-                            <img 
-                                src={avatar.image}
-                                alt={avatar.name}
-                                className="w-20 h-20 rounded-full object-cover"
-                            />
-                        </button>
-                    ))}
+                <div className="flex flex-wrap justify-end gap-4">
+                    <button
+                        onClick={handleSave}
+                        className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
+                    >
+                        Save Changes
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
+                    >
+                        Cancel
+                    </button>
                 </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-4">
-                <button
-                    onClick={() => {
-                        const updatedUser: User = {
-                            ...user,
-                            displayName,
-                            bio: displayBio,
-                            avatarId,
-                            updatedAt: Date.now(),
-                        };
-
-                        updateUser(updatedUser);
-                        onClose();
-                    }}
-                    className="mt-6 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
-                >
-                    Save Changes
-                </button>
-                <button
-                    onClick={onClose}
-                    className="mt-6 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
-                >
-                    Cancel
-                </button>
             </div>
         </section>   
     );

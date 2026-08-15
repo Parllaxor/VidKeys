@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer";
 
 import {
     DoorOpen,
@@ -115,6 +116,8 @@ function DashboardPage() {
                     </Link>
                 </DashboardCard>
             </div>
+
+            <Footer />
         </AppLayout>
     );
 }

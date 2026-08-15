@@ -1,4 +1,14 @@
+import { getUserById } from "../users/userDatabase";
+import { useState } from "react";
+
 function Topbar() {
+
+const [user, setUser] = useState(() => getUserById("test"));
+
+    if (!user) {
+        return <div>ERROR: User not found</div>;
+    }
+    
     return (
         <header className="
             h-16
@@ -15,8 +25,8 @@ function Topbar() {
                 </h1>
             </div>
 
-            <div className="text-slate-400">
-                Welcome, Guest User
+            <div className="hidden text-slate-400 sm:block">
+                Welcome, {user.displayName}
             </div>
         </header>
     );

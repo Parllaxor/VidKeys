@@ -1,10 +1,10 @@
-import { type User, testUser } from "./user"
+import { type User, testUser, testUser2 } from "./user"
 import { loadUsers, saveUsers } from "./userStorage";
 
 let users: User[] = loadUsers();
 
 if (users.length === 0) {
-    users = [testUser];
+    users = [testUser, testUser2];
     saveUsers(users);
 }
 
@@ -50,11 +50,17 @@ export function createDefaultUser(
         displayName,
         bio: "",
         avatarId: "default",
+        avatarUrl: null,
+        uploadedAvatars: [],
         status: "offline",
         lastActive: Date.now(),
         createdAt: Date.now(),
         updatedAt: Date.now(),
         friends: [],
+        sentRequests: [],
+        receivedRequests: [],
+        blockedUsers: [],
+        reports: [],
         roomId: null,
         roomsCreated: 0,
         roomsVisited: 0,
@@ -78,6 +84,118 @@ export function deleteUser(user: User) {
 
     users = users.filter((u) => u.id !== user.id);
     saveUsers(users);
+}
+
+{/* Friend Utility */}
+export function sendFriendRequest(fromUser: User, toUser: User) {
+    if (fromUser.id === toUser.id) {
+        return;
+    } else if (!users.some((u) => u.id === fromUser.id) || !users.some((u) => u.id === toUser.id)) {
+        return;
+    } else if (toUser.receivedRequests.includes(fromUser.id) || fromUser.sentRequests.includes(toUser.id)) {
+        return;
+    } else if (fromUser.receivedRequests.includes(toUser.id) || toUser.sentRequests.includes(fromUser.id)) {
+        return;
+    } else if (fromUser.friends.includes(toUser.id) || toUser.friends.includes(fromUser.id)) {
+        return;
+    }
+
+    fromUser.sentRequests.push(toUser.id);
+    toUser.receivedRequests.push(fromUser.id);
+
+    updateUser(fromUser);
+    updateUser(toUser);
+}
+
+export function removeFriendRequests(fromUser: User, toUser: User) {
+    if (fromUser.id === toUser.id) {
+        return;
+    }
+
+    if (fromUser.receivedRequests.includes(toUser.id)) {
+        fromUser.receivedRequests = fromUser.receivedRequests.filter(
+            (friendId) => friendId !== toUser.id);
+        toUser.sentRequests = toUser.sentRequests.filter(
+            (friendId) => friendId !== fromUser.id);
+    } else if (toUser.receivedRequests.includes(fromUser.id)) {
+        toUser.receivedRequests = toUser.receivedRequests.filter(
+            (friendId) => friendId !== fromUser.id);
+        fromUser.sentRequests = fromUser.sentRequests.filter(
+            (friendId) => friendId !== toUser.id);
+    }
+
+    updateUser(toUser);
+    updateUser(fromUser);
+}
+
+export function addFriend(fromUser: User, toUser: User) {
+    if (fromUser.id === toUser.id) {
+        return;
+    } else if (fromUser.blockedUsers.includes(toUser.id) || toUser.blockedUsers.includes(fromUser.id)) {
+        return;
+    } else if (!fromUser.receivedRequests.includes(toUser.id) && !toUser.receivedRequests.includes(fromUser.id)) {
+        sendFriendRequest(fromUser, toUser);
+        return;
+    }
+
+    fromUser.friends.push(toUser.id);
+    toUser.friends.push(fromUser.id)
+
+    removeFriendRequests(toUser, fromUser);
+
+    updateUser(fromUser);
+    updateUser(toUser);
+}
+
+export function removeFriend(fromUser: User, toUser: User) {
+    if (fromUser.id === toUser.id) {
+        return;
+    } else if (!fromUser.friends.includes(toUser.id) || !toUser.friends.includes(fromUser.id)) {
+        return;
+    }
+
+    fromUser.friends = fromUser.friends.filter(
+        (friendId) => friendId !== toUser.id);
+    toUser.friends = toUser.friends.filter(
+        (friendId) => friendId !== fromUser.id);
+
+    updateUser(fromUser);
+    updateUser(toUser);
+}
+
+export function blockUser(fromUser: User, toUser: User) {
+    if (fromUser.id === toUser.id) {
+        return;
+    } else if (fromUser.blockedUsers.includes(toUser.id)) {
+        return;
+    }
+
+    fromUser.blockedUsers.push(toUser.id);
+
+    removeFriend(fromUser, toUser);
+    removeFriendRequests(fromUser, toUser);
+
+    updateUser(toUser);
+    updateUser(fromUser);
+}
+
+export function removeBlockedUser(fromUser: User, toUser: User) {
+    if (fromUser.id === toUser.id) {
+        return;
+    } else if (!fromUser.blockedUsers.includes(toUser.id)) {
+        return
+    }
+
+    fromUser.blockedUsers = fromUser.blockedUsers.filter(
+        (blockedId) => blockedId !== toUser.id);
+
+    updateUser(fromUser);
+}
+
+export function reportUser(fromUser: User, toUser: User, report: string) {
+    toUser.reports.push(fromUser.id + " " + report);
+
+    updateUser(toUser);
 }
 
 {/* Other Utility */}

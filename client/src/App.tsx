@@ -7,6 +7,10 @@ import DashboardPage from "./pages/DashboardPage";
 import RoomsPage from "./pages/RoomsPage";
 import ProfilePage from "./pages/Profile";
 import NotFoundPage from "./pages/NotFoundPage";
+import UsersPage from "./pages/UsersPage";
+import FriendsPage from "./pages/FriendsPage";
+import SettingsPage from "./pages/SettingsPage";
+import AvatarSelector from "./components/AvatarSelector";
 
 function App() {
   return (
@@ -18,6 +22,11 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/friends" element={<FriendsPage />} />
+        <Route path="/profile/avatar" element={<AvatarSelector />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

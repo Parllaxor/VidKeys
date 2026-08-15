@@ -1,7 +1,19 @@
-import { Link, NavLink } from "react-router-dom";
-import { User, LayoutDashboard, DoorOpen, Users, Settings } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { User as UserIcon, LayoutDashboard, DoorOpen, Users, Settings, ContactRound, Contact } from "lucide-react";
+import { getAvatarById } from "../users/avatars";
+import { getUserById } from "../users/userDatabase";
+import { useState } from "react";
 
 function Sidebar () {
+    const [user, setUser] = useState(() => getUserById("test"));
+
+    if (!user) {
+        return <div>ERROR: User not found</div>;
+    }
+
+    const avatar = getAvatarById(user.avatarId);
+    const avatarImage = user.avatarUrl ?? avatar?.image;
+
     return (
         <section className="
             w-64
@@ -95,6 +107,30 @@ function Sidebar () {
                 </NavLink>
 
                 <NavLink
+                    to="/friends"
+                    className={({ isActive }) =>
+                        `
+                        flex
+                        items-center
+                        gap-3
+                        px-6
+                        py-3
+                        rounded-lg
+                        transition-all
+                        duration-200
+                        ${
+                            isActive
+                                ? "bg-slate-800 text-cyan-400"
+                                : "text-slate-300 hover:bg-slate-800 hover:text-cyan-400"
+                        }
+                        `
+                    }
+                >
+                    <ContactRound className="w-5 h-5" />
+                    <span>Friends</span>
+                </NavLink>
+
+                <NavLink
                     to="/settings"
                     className={({ isActive }) =>
                         `
@@ -144,12 +180,20 @@ function Sidebar () {
                         items-center
                         justify-center
                     ">
-                        <User className="w-6 h-6 text-slate-300" />
+                        {avatarImage ? (
+                            <img
+                                src={avatarImage}
+                                alt={avatar?.name ?? "Profile avatar"}
+                                className="h-12 w-12 rounded-full object-cover"
+                                />
+                        ) : (
+                            <UserIcon className="h-12 w-12 text-slate-400" />
+                        )}
                     </div>
 
                     <div>
                         <p className="font-semibold text-white">
-                            Guest User
+                            {user.displayName}
                         </p>
                         
                         <p className="text-sm text-slate-400">

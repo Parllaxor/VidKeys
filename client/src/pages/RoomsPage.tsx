@@ -4,7 +4,8 @@ import RoomPreview from "../components/RoomPreview";
 import { useState, useEffect } from "react";
 import { currentRoom } from "../room/room";
 import RoomCustomizer from "../components/RoomCustomizer";
-import { defaultPresets } from "../room/presets"
+import { defaultPresets } from "../room/presets";
+import Footer from "../components/Footer";
 
 function RoomsPage() {
     const [presets, setPresets] = useState(() => {
@@ -68,6 +69,8 @@ function RoomsPage() {
                     />
                 </div>
             </div>
+
+            <Footer />
         </AppLayout>
     );
 }

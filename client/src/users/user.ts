@@ -3,7 +3,10 @@ export interface User {
     username: string;
     displayName: string;
     bio: string;
+
     avatarId: string;
+    avatarUrl: string | null;
+    uploadedAvatars: string[];
 
     status: "online" | "offline" | "away" | "dnd";
 
@@ -12,6 +15,11 @@ export interface User {
     lastActive: number;
 
     friends: string[];
+    sentRequests: string[];
+    receivedRequests: string[];
+    blockedUsers: string[];
+    reports: string[];
+
     roomId: string | null;
 
     // VidKeys stats
@@ -29,7 +37,10 @@ export const testUser: User = {
     username: "testuser",
     displayName: "Test User",
     bio: "This is a test user.",
+
     avatarId: "default",
+    avatarUrl: null,
+    uploadedAvatars: [],
 
     status: "offline",
 
@@ -37,7 +48,43 @@ export const testUser: User = {
     createdAt: Date.now(),
     updatedAt: Date.now(),
 
-    friends: [],
+    friends: ["test2"],
+    sentRequests: [],
+    receivedRequests: [],
+    blockedUsers: [],
+    reports: [],
+    roomId: null,
+    
+    roomsCreated: 0,
+    roomsVisited: 0,
+    totalCallMinutes: 0,
+    gamesPlayed: 0,
+    achievementsUnlocked: 0,
+    favoriteTheme: "default",
+    reputation: 0,
+}
+
+export const testUser2: User = {
+    id: "test2",
+    username: "testuser2",
+    displayName: "Test User 2",
+    bio: "This is a second test user.",
+
+    avatarId: "Robot",
+    avatarUrl: null,
+    uploadedAvatars: [],
+
+    status: "offline",
+
+    lastActive: Date.now(),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+
+    friends: ["test"],
+    sentRequests: [],
+    receivedRequests: [],
+    blockedUsers: [],
+    reports: [],
     roomId: null,
     
     roomsCreated: 0,
