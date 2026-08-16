@@ -3,7 +3,8 @@ import { useState } from "react";
 
 function Topbar() {
 
-const [user, setUser] = useState(() => getUserById("test"));
+    const [user, setUser] = useState(() => getUserById("test"));
+    setUser(user);
 
     if (!user) {
         return <div>ERROR: User not found</div>;

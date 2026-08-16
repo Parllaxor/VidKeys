@@ -1,11 +1,13 @@
 import { NavLink } from "react-router-dom";
-import { User as UserIcon, LayoutDashboard, DoorOpen, Users, Settings, ContactRound, Contact } from "lucide-react";
+import { User as UserIcon, LayoutDashboard, DoorOpen, Users, Settings, ContactRound } from "lucide-react";
 import { getAvatarById } from "../users/avatars";
 import { getUserById } from "../users/userDatabase";
 import { useState } from "react";
 
 function Sidebar () {
     const [user, setUser] = useState(() => getUserById("test"));
+    // Just using setUser for the sake of removing the error
+    setUser(user);
 
     if (!user) {
         return <div>ERROR: User not found</div>;

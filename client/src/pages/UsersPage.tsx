@@ -1,4 +1,4 @@
-import { getUserById, getAllUsers, sendFriendRequest, removeFriend, blockUser, addFriend, removeFriendRequests, userExists } from "../users/userDatabase";
+import { getUserById, getAllUsers, sendFriendRequest, removeFriend, addFriend, removeFriendRequests } from "../users/userDatabase";
 import type { User } from "../users/user";
 import { getAvatarById } from "../users/avatars";
 import { UserRound, UserPlus } from "lucide-react"
@@ -52,7 +52,7 @@ function UsersPage() {
                     const isFriend = currentUser?.friends.includes(user.id);
                     const requestSent = currentUser?.sentRequests.includes(user.id);
                     const requestReceived = currentUser?.receivedRequests.includes(user.id);
-                    const isBlocked = currentUser?.blockedUsers.includes(user.id);
+                    //const isBlocked = currentUser?.blockedUsers.includes(user.id);
 
                     return (
                         <div
