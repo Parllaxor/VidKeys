@@ -14,7 +14,7 @@ import AvatarSelector from "./components/AvatarSelector";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/VidKeys">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
