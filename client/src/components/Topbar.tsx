@@ -1,10 +1,8 @@
 import { getUserById } from "../users/userDatabase";
-import { useState } from "react";
 
 function Topbar() {
 
-    const [user, setUser] = useState(() => getUserById("test"));
-    setUser(user);
+    const user = getUserById("test");
 
     if (!user) {
         return <div>ERROR: User not found</div>;
