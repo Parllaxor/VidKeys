@@ -1,5 +1,5 @@
 import { Home, Users, Gamepad2, Video, MessageCircle, Rocket, Telescope, Trophy, Cat, Bed, TreePalm } from "lucide-react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function WhyVidkeys() {
     return (
@@ -117,12 +117,12 @@ function WhyVidkeys() {
                         </div>
 
                         <div className="mt-10">
-                            <Link
+                            <NavLink
                                 // If not logged in, route to register eventually
                                 to="/rooms"
                                 className="px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-600 transition-colors duration-300 font-semibold">
                                 Create Your Room
-                            </Link>
+                            </NavLink>
                         </div>
                     </div>
 
