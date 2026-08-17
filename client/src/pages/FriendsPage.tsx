@@ -1,9 +1,10 @@
-import { getUserById } from "../users/userDatabase";
-import { getAvatarById } from "../users/avatars";
+import { getUserById, removeFriend, removeFriendRequests, addFriend } from "../users/userDatabase";
 import { useNavigate } from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 import Footer from "../components/Footer";
-import { User as UserIcon } from "lucide-react";
+import FriendCard from "../components/FriendCard";
+import FriendRequests from "../components/FriendRequests";
+import ConfirmationModal from "../components/ConfirmationModal";
 import { useState } from "react";
 
 function FriendsPage() {
@@ -13,8 +14,10 @@ function FriendsPage() {
         "friends"
     );
 
-    const currentUserId = "test";
-    const currentUser = getUserById(currentUserId);
+    const [user, setUser] = useState(() => getUserById("test"));
+    const [friendToRemove, setFriendToRemove] = useState<string | null>(null);
+
+    const currentUser = user;
 
     if (!currentUser) {
         return null;
@@ -26,6 +29,55 @@ function FriendsPage() {
             (friend): friend is NonNullable<typeof friend> =>
                 friend !== undefined
         );
+
+    const handleRemoveFriend = (friendId: string) => {
+        const friend = getUserById(friendId);
+
+        if (!friend) {
+            return;
+        }
+
+        removeFriend(currentUser, friend);
+
+        setUser({
+            ...currentUser,
+            friends: currentUser.friends.filter(
+                (id) => id !== friendId
+            ),
+        });
+    };
+
+    const handleAcceptRequest = (requestId: string) => {
+        const request = getUserById(requestId);
+
+        if (!request) {
+            return;
+        }
+
+        addFriend(currentUser, request);
+
+        const updatedUser = getUserById(currentUser.id);
+
+        if (updatedUser) {
+            setUser(updatedUser);
+        }
+    };
+
+    const handleDeclineRequest = (requestId: string) => {
+        const request = getUserById(requestId); 
+        
+        if (!request) {
+            return;
+        }
+
+        removeFriendRequests(currentUser, request);
+
+        const updatedUser = getUserById(currentUser.id);
+
+        if (updatedUser) {
+            setUser(updatedUser);
+        }
+    };
 
     return (
         <AppLayout>
@@ -102,88 +154,24 @@ function FriendsPage() {
                                 </div>
                             ) : (
                                 <div className="grid gap-4">
-                                    {friends.map((friend) => {
-                                        const avatar = getAvatarById(
-                                            friend.avatarId
-                                        );
-
-                                        return (
-                                            <div
-                                                key={friend.id}
-                                                className="flex items-center justify-between rounded-2xl border border-slate-700 bg-[#111827] p-4 transition-all duration-200 hover:border-slate-600"
-                                            >
-                                                {/* Friend Info */}
-                                                <div className="flex items-center gap-4">
-                                                    <div className="relative">
-                                                        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-slate-600 bg-slate-900">
-                                                            {avatar ? (
-                                                                <img
-                                                                    src={
-                                                                        avatar.image
-                                                                    }
-                                                                    alt={`${friend.displayName}'s avatar`}
-                                                                    className="h-full w-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <UserIcon className="h-7 w-7 text-slate-500" />
-                                                            )}
-                                                        </div>
-
-                                                        {/* Status */}
-                                                        <div
-                                                            className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-[#111827] ${
-                                                                friend.status ===
-                                                                "online"
-                                                                    ? "bg-cyan-400"
-                                                                    : friend.status ===
-                                                                      "away"
-                                                                    ? "bg-yellow-400"
-                                                                    : friend.status ===
-                                                                      "dnd"
-                                                                    ? "bg-red-400"
-                                                                    : "bg-slate-500"
-                                                            }`}
-                                                        />
-                                                    </div>
-
-                                                    <div>
-                                                        <h3 className="font-semibold text-white">
-                                                            {
-                                                                friend.displayName
-                                                            }
-                                                        </h3>
-
-                                                        <p className="text-sm text-slate-400">
-                                                            @{friend.username}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                {/* View Profile */}
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/profile/${friend.id}`
-                                                        )
-                                                    }
-                                                    className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-300 transition-all duration-200 hover:border-cyan-400/50 hover:bg-cyan-950/40 hover:text-cyan-300"
-                                                >
-                                                    View Profile
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
+                                    {friends.map((friend) => (
+                                        <FriendCard 
+                                            key={friend.id}
+                                            friend={friend}
+                                            onRemove={setFriendToRemove}
+                                        />
+                                    ))}
                                 </div>
                             )}
                         </div>
                     ) : (
-                        /* Requests */
-                        <div className="rounded-2xl border border-slate-700 bg-[#111827] p-8 text-center">
-                            <p className="text-slate-400">
-                                Friend requests will appear here.
-                            </p>
-                        </div>
+                        // Requests Cards
+                        <FriendRequests
+                            requests={currentUser.receivedRequests}
+                            onAccept={handleAcceptRequest}
+                            onDecline={handleDeclineRequest}
+                            onViewProfile={(id) => navigate(`/profile/${id}`)}
+                        />
                     )}
 
                     {/* Find Friends */}
@@ -207,6 +195,27 @@ function FriendsPage() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={friendToRemove !== null}
+                title="Remove Friend?"
+                message={
+                    friendToRemove
+                        ? `Are you sure you want to remove ${
+                            getUserById(friendToRemove)?.displayName ?? "this friend"
+                        } from your friends?`
+                        : ""
+                }
+                confirmText="Remove Friend"
+                onConfirm={() => {
+                    if (friendToRemove) {
+                        handleRemoveFriend(friendToRemove);
+                    }
+
+                    setFriendToRemove(null);
+                }}
+                onCancel={() => setFriendToRemove(null)}
+            />
 
             <Footer />
         </AppLayout>
