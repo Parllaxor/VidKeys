@@ -84,15 +84,16 @@ function FriendsPage() {
             <div className="mt-8">
                 {/* Tabs */}
                 <div className="rounded-3xl border border-slate-700 bg-slate-950/60 p-6">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 border-b border-slate-800">
                         <button
                             type="button"
                             onClick={() => setActiveTab("friends")}
                             className={`
-                                rounded-2xl
+                                relative
+                                rounded-t-xl
                                 px-4
                                 py-2
-                                text-xl
+                                text-lg
                                 font-bold
                                 transition-all
                                 duration-200
@@ -107,16 +108,29 @@ function FriendsPage() {
                             <span className="ml-2 text-sm font-semibold text-slate-400">
                                 {currentUser.friends.length}
                             </span>
+
+                            {activeTab === "friends" && (
+                                <span className="
+                                    absolute
+                                    bottom-0
+                                    left-2
+                                    right-2
+                                    h-0.5
+                                    rounded-full
+                                    bg-cyan-400    
+                                " />
+                            )}
                         </button>
 
                         <button
                             type="button"
                             onClick={() => setActiveTab("requests")}
                             className={`
-                                rounded-2xl
+                                relative
+                                rounded-t-xl
                                 px-4
                                 py-2
-                                text-xl
+                                text-lg
                                 font-bold
                                 transition-all
                                 duration-200
@@ -131,6 +145,18 @@ function FriendsPage() {
                             <span className="ml-2 text-sm font-semibold text-slate-400">
                                 {currentUser.receivedRequests.length}
                             </span>
+
+                            {activeTab === "requests" && (
+                                <span className="
+                                    absolute
+                                    bottom-0
+                                    left-2
+                                    right-2
+                                    h-0.5
+                                    rounded-full
+                                    bg-cyan-400
+                                " />
+                            )}
                         </button>
                     </div>
 

@@ -50,7 +50,7 @@ export const testUser: User = {
 
     friends: ["test2"],
     sentRequests: [],
-    receivedRequests: [],
+    receivedRequests: ["test3"],
     blockedUsers: [],
     reports: [],
     roomId: null,
@@ -82,6 +82,38 @@ export const testUser2: User = {
 
     friends: ["test"],
     sentRequests: [],
+    receivedRequests: [],
+    blockedUsers: [],
+    reports: [],
+    roomId: null,
+    
+    roomsCreated: 0,
+    roomsVisited: 0,
+    totalCallMinutes: 0,
+    gamesPlayed: 0,
+    achievementsUnlocked: 0,
+    favoriteTheme: "default",
+    reputation: 0,
+}
+
+export const testUser3: User = {
+    id: "test3",
+    username: "testuser3",
+    displayName: "Test User 3",
+    bio: "This is a third test user.",
+
+    avatarId: "Fox",
+    avatarUrl: null,
+    uploadedAvatars: [],
+
+    status: "dnd",
+
+    lastActive: Date.now(),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+
+    friends: [],
+    sentRequests: ["test"],
     receivedRequests: [],
     blockedUsers: [],
     reports: [],

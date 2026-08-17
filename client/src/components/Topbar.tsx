@@ -17,6 +17,8 @@ function Topbar() {
             items-center
             justify-between
             px-8
+            pl-20
+            sm:pl-8
         ">
             <div>
                 <h1 className="text-xl font-semibold text-white">

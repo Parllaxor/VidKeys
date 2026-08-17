@@ -30,11 +30,10 @@ function Sidebar () {
             <button
                 type="button"
                 onClick={() => setIsOpen((prev) => !prev)}
-                className="
+                className={`
                     fixed
-                    left-4
                     top-4
-                    z-50
+                    z-[60]
                     rounded-xl
                     border
                     border-slate-700
@@ -42,12 +41,13 @@ function Sidebar () {
                     p-3
                     text-slate-300
                     transition-all
-                    duration-200
+                    duration-300
                     hover:border-cyan-400/50
                     hover:bg-slate-800
                     hover:text-cyan-400
                     md:hidden
-                "
+                    ${isOpen ? "left-48" : "left-4"}
+                `}
             >
                 {isOpen ? (
                     <X className="h-5 w-5" />
@@ -56,6 +56,19 @@ function Sidebar () {
                 )}
             </button>
 
+            {isOpen && (
+                <div
+                    onClick={closeMenu}
+                    className="
+                        fixed
+                        inset-0
+                        z-40
+                        bg-black/50
+                        md:hidden
+                    "
+                />
+            )}
+
             <section className={`
                 fixed
                 left-0
@@ -63,6 +76,7 @@ function Sidebar () {
                 z-50
                 h-screen
                 w-64
+                max-w-[85vw]
                 bg-[#111827]
                 border-r
                 border-[#2A2E38]

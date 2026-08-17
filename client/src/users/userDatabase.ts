@@ -1,10 +1,10 @@
-import { type User, testUser, testUser2 } from "./user"
+import { type User, testUser, testUser2, testUser3 } from "./user"
 import { loadUsers, saveUsers } from "./userStorage";
 
 let users: User[] = loadUsers();
 
 if (users.length === 0) {
-    users = [testUser, testUser2];
+    users = [testUser, testUser2, testUser3];
     saveUsers(users);
 }
 
