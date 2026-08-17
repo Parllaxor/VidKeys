@@ -11,7 +11,7 @@ function AppLayout({ children }: Props) {
         <main className="flex">
             <Sidebar />
 
-            <div className="flex-1">
+            <div className="md:ml-64 flex-1">
                 <Topbar />
 
                 <div className="p-8">
