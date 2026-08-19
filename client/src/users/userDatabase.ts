@@ -31,13 +31,28 @@ export function updateUser(updatedUser: User) {
 }
 
 {/* Create Users */}
-export function createUser(user: User) {
+export function createUser(user: User): ActionResult {
     if (users.some((u) => u.id === user.id)) {
-        return;
+        return {
+            success: false,
+            message: "User ID taken."
+        };
+    }
+
+    if (users.some((u) => u.username === user.username)) {
+        return {
+            success: false,
+            message: "Username already taken."
+        };
     }
     
     users.push(user);
     saveUsers(users);
+
+    return {
+        success: true,
+        message: `Welcome to VidKeys, ${user.username}!`
+    };
 }
 
 export function createDefaultUser(
@@ -201,4 +216,9 @@ export function reportUser(fromUser: User, toUser: User, report: string) {
 {/* Other Utility */}
 export function userExists(id: string) {
     return users.some((user) => user.id === id);
+}
+
+export interface ActionResult {
+    success: boolean;
+    message: string;
 }

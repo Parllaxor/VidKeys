@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 function WhyVidkeys() {
     return (
-        <section className="max-w-7xl mx-auto px-8 py-24">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="rounded-3xl bg-[#111827] border border-slate-700 shadow-2xl p-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     
@@ -30,8 +30,8 @@ function WhyVidkeys() {
 
                         {/* Benefits */}
                         <div className="mt-8 space-y-6">
-                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                            <div className="flex items-start gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Home className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -47,8 +47,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                            <div className="flex items-start gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Users className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -64,8 +64,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                            <div className="flex items-start gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Gamepad2 className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -81,8 +81,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                            <div className="flex items-start gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <Video className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -98,8 +98,8 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 hover:translate-x-1 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                            <div className="flex items-start gap-4 hover:translate-x-1 transition-all duration-300">
+                                <div className="w-12 h-12 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
                                     {/* Icon */}
                                     <MessageCircle className="w-6 h-6 text-cyan-400" />
                                 </div>
@@ -134,7 +134,7 @@ function WhyVidkeys() {
                                 <h3 className="text-xl font-semibold">
                                     My Room
                                 </h3>
-                    
+
                                 <p className="text-sm text-slate-400">
                                     Personalized Space
                                 </p>
@@ -145,7 +145,7 @@ function WhyVidkeys() {
                             </div>
                         </div>
 
-                        <div className="p-6 space-y-6">
+                        <div className="p-4 sm:p-6 space-y-6">
                             {/* Details */}
                             <div>
                                 <p className="text-sm uppercase tracking-wide text-slate-500">
@@ -217,7 +217,7 @@ function WhyVidkeys() {
                                 </div>
                             </div>
 
-                            <div className="border-t border-slate-700 p-6">
+                            <div className="border-t border-slate-700 p-4 sm:p-6">
                                 <p className="text-slate-300 italic">
                                     "Friends can always stop by."
                                 </p>

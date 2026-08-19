@@ -1,3 +1,5 @@
+import pancakesAvatar from "../avatars/pancakes.png";
+
 export interface Avatar {
     id: string;
     name: string;
@@ -22,6 +24,12 @@ export const avatars: Avatar[] = [
         name: "Fox",
         image: "/avatars/fox.png"
     },
+
+    {
+        id: "pancakes",
+        name: "Pancakes",
+        image: pancakesAvatar
+    }
 ]
 
 export function getAvatarById(id: string) {

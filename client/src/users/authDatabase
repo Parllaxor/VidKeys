@@ -1,0 +1,34 @@
+import { AuthUser } from "./auth";
+import { loadAuthUsers, saveAuthUsers } from "./authStorage";
+
+let auths: AuthUser[] = loadAuthUsers();
+
+export function getAuthByUserId(userId: string) {
+    if (!userId) {
+        return;
+    }
+
+    return auths.find((auth) => auth.userId === userId);
+}
+
+export function createAuth(auth: AuthUser): ActionResult {
+    if (auths.some((authUser) => authUser.userId === auth.userId)) {
+        return {
+            success: false,
+            message: "User authentication already exists."
+        };
+    }
+    
+    auths.push(auth);
+    saveAuthUsers(auths);
+
+    return {
+        success: true,
+        message: "Authentication created successfully."
+    }
+}
+
+export interface ActionResult {
+    success: boolean;
+    message: string;
+}

@@ -1,12 +1,29 @@
 import { getUserById } from "../users/userDatabase";
+import { useLocation } from "react-router-dom";
 
 function Topbar() {
 
     const user = getUserById("test");
+    const location = useLocation();
 
     if (!user) {
         return <div>ERROR: User not found</div>;
     }
+
+    if (!location) {
+        return <div>ERROR: 404 Page not found</div>
+    }
+
+    const pageTitles: Record<string, string> = {
+        "/dashboard": "Dashboard",
+        "/rooms": "Rooms",
+        "/users": "Users",
+        "/profile": "Profile",
+        "/settings": "Settings",
+        "/friends": "Friends",
+    };
+
+    const currentPage = pageTitles[location.pathname] ?? "VidKeys";
     
     return (
         <header className="
@@ -22,7 +39,7 @@ function Topbar() {
         ">
             <div>
                 <h1 className="text-xl font-semibold text-white">
-                    Dashboard
+                    {currentPage}
                 </h1>
             </div>
 
