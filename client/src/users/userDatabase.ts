@@ -55,15 +55,17 @@ export function createUser(user: User): ActionResult {
     };
 }
 
-export function createDefaultUser(
+export function createDefaultUser (
     username: string,
-    displayName: string
-): User {
+    displayName: string,
+    birthday: string,
+): {result: ActionResult; user?: User} {
     const user: User = {
         id: crypto.randomUUID(),
         username,
         displayName,
         bio: "",
+        birthday: birthday,
         avatarId: "default",
         avatarUrl: null,
         uploadedAvatars: [],
@@ -86,9 +88,16 @@ export function createDefaultUser(
         reputation: 0,
     };
 
-    createUser(user);
+    const result = createUser(user);
 
-    return user;
+    if (!result.success) {
+        return { result };
+    }
+
+    return {
+        result,
+        user
+    };
 }
 
 {/* Delete Users */}
@@ -102,17 +111,32 @@ export function deleteUser(user: User) {
 }
 
 {/* Friend Utility */}
-export function sendFriendRequest(fromUser: User, toUser: User) {
+export function sendFriendRequest(fromUser: User, toUser: User) : ActionResult {
     if (fromUser.id === toUser.id) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: Cannot send friend request to yourself."
+        };
     } else if (!users.some((u) => u.id === fromUser.id) || !users.some((u) => u.id === toUser.id)) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: User not found."
+        };
     } else if (toUser.receivedRequests.includes(fromUser.id) || fromUser.sentRequests.includes(toUser.id)) {
-        return;
+        return {
+            success: false,
+            message: `Request previously sent to ${toUser}.`
+        };
     } else if (fromUser.receivedRequests.includes(toUser.id) || toUser.sentRequests.includes(fromUser.id)) {
-        return;
+        return {
+            success: false,
+            message: `Request already received from ${toUser}.`
+        };
     } else if (fromUser.friends.includes(toUser.id) || toUser.friends.includes(fromUser.id)) {
-        return;
+        return {
+            success: false,
+            message: `Already friends with ${toUser}.`
+        };
     }
 
     fromUser.sentRequests.push(toUser.id);
@@ -120,11 +144,19 @@ export function sendFriendRequest(fromUser: User, toUser: User) {
 
     updateUser(fromUser);
     updateUser(toUser);
+
+    return {
+        success: true,
+        message: `Successfully sent friend request to ${toUser}!`
+    };
 }
 
-export function removeFriendRequests(fromUser: User, toUser: User) {
+export function removeFriendRequests(fromUser: User, toUser: User) : ActionResult {
     if (fromUser.id === toUser.id) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: you should not be able to friend yourself."
+        };
     }
 
     if (fromUser.receivedRequests.includes(toUser.id)) {
@@ -141,16 +173,26 @@ export function removeFriendRequests(fromUser: User, toUser: User) {
 
     updateUser(toUser);
     updateUser(fromUser);
+
+    return {
+        success: true,
+        message: `Friend request from ${toUser} successfully removed.`
+    };
 }
 
-export function addFriend(fromUser: User, toUser: User) {
+export function addFriend(fromUser: User, toUser: User) : ActionResult {
     if (fromUser.id === toUser.id) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: Cannot friend yourself."
+        };
     } else if (fromUser.blockedUsers.includes(toUser.id) || toUser.blockedUsers.includes(fromUser.id)) {
-        return;
+        return {
+            success: false,
+            message: `${toUser} could not be added as a friend.`
+        };
     } else if (!fromUser.receivedRequests.includes(toUser.id) && !toUser.receivedRequests.includes(fromUser.id)) {
-        sendFriendRequest(fromUser, toUser);
-        return;
+        return sendFriendRequest(fromUser, toUser);
     }
 
     fromUser.friends.push(toUser.id);
@@ -160,13 +202,24 @@ export function addFriend(fromUser: User, toUser: User) {
 
     updateUser(fromUser);
     updateUser(toUser);
+
+    return {
+        success: true,
+        message: `Successfully added ${toUser} as a friend!`
+    };
 }
 
-export function removeFriend(fromUser: User, toUser: User) {
+export function removeFriend(fromUser: User, toUser: User) : ActionResult {
     if (fromUser.id === toUser.id) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: Cannot friend yourself."
+        };
     } else if (!fromUser.friends.includes(toUser.id) || !toUser.friends.includes(fromUser.id)) {
-        return;
+        return {
+            success: false,
+            message: `Not currently friends with ${toUser}.`
+        };
     }
 
     fromUser.friends = fromUser.friends.filter(
@@ -176,13 +229,24 @@ export function removeFriend(fromUser: User, toUser: User) {
 
     updateUser(fromUser);
     updateUser(toUser);
+
+    return {
+        success: true,
+        message: `${toUser} has been removed from your friends list.`
+    };
 }
 
-export function blockUser(fromUser: User, toUser: User) {
+export function blockUser(fromUser: User, toUser: User) : ActionResult {
     if (fromUser.id === toUser.id) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: Cannot block yourself."
+        };
     } else if (fromUser.blockedUsers.includes(toUser.id)) {
-        return;
+        return {
+            success: false,
+            message: `${toUser} already blocked.`
+        };
     }
 
     fromUser.blockedUsers.push(toUser.id);
@@ -192,19 +256,35 @@ export function blockUser(fromUser: User, toUser: User) {
 
     updateUser(toUser);
     updateUser(fromUser);
+
+    return {
+        success: true,
+        message: `Successfully blocked ${toUser}.`
+    };
 }
 
-export function removeBlockedUser(fromUser: User, toUser: User) {
+export function removeBlockedUser(fromUser: User, toUser: User) : ActionResult {
     if (fromUser.id === toUser.id) {
-        return;
+        return {
+            success: false,
+            message: "ERROR: Should not be possible to block yourself in the first place."
+        };
     } else if (!fromUser.blockedUsers.includes(toUser.id)) {
-        return
+        return {
+            success: false,
+            message: `${toUser} not currently blocked.`
+        };
     }
 
     fromUser.blockedUsers = fromUser.blockedUsers.filter(
         (blockedId) => blockedId !== toUser.id);
 
     updateUser(fromUser);
+
+    return {
+        success: true,
+        message: `Successfully unblocked ${toUser}!`
+    };
 }
 
 export function reportUser(fromUser: User, toUser: User, report: string) {

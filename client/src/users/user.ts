@@ -3,6 +3,7 @@ export interface User {
     username: string;
     displayName: string;
     bio: string;
+    birthday: string;
 
     avatarId: string;
     avatarUrl: string | null;
@@ -37,6 +38,7 @@ export const testUser: User = {
     username: "testuser",
     displayName: "Test User",
     bio: "This is a test user.",
+    birthday: "2001-08-19",
 
     avatarId: "default",
     avatarUrl: null,
@@ -69,6 +71,7 @@ export const testUser2: User = {
     username: "testuser2",
     displayName: "Test User 2",
     bio: "This is a second test user.",
+    birthday: "2001-08-19",
 
     avatarId: "Robot",
     avatarUrl: null,
@@ -101,6 +104,7 @@ export const testUser3: User = {
     username: "testuser3",
     displayName: "Test User 3",
     bio: "This is a third test user.",
+    birthday: "2001-08-19",
 
     avatarId: "Fox",
     avatarUrl: null,
