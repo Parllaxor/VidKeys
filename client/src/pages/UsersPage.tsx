@@ -1,4 +1,5 @@
-import { getUserById, getAllUsers, sendFriendRequest, removeFriend, addFriend, removeFriendRequests } from "../users/userDatabase";
+import { getAllUsers, sendFriendRequest, removeFriend, addFriend, removeFriendRequests } from "../users/userDatabase";
+import { getCurrentUser } from "../users/currentUser"
 import type { User } from "../users/user";
 import { getAvatarById } from "../users/avatars";
 import { UserRound, UserPlus } from "lucide-react"
@@ -17,8 +18,8 @@ function UsersPage() {
     };
 
     const users = getAllUsers();
-    const currentUserId = "test";
-    const currentUser = getUserById(currentUserId);
+    const currentUser = getCurrentUser();
+    const currentUserId = currentUser?.id;
 
     const sortedUsers = [...users].sort((a, b) => {
         if (a.id === currentUserId) return -1;
@@ -206,7 +207,7 @@ function UsersPage() {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            const fromUser = getUserById("test");
+                                            const fromUser = currentUser;
                                             const toUser = user;
 
                                             if (!fromUser || !toUser) {

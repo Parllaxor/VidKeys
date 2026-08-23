@@ -1,15 +1,21 @@
 import AppLayout from "../layouts/AppLayout";
 import RoomPreview from "../components/RoomPreview";
-
 import { useState, useEffect } from "react";
 import { currentRoom } from "../room/room";
 import RoomCustomizer from "../components/RoomCustomizer";
 import { defaultPresets } from "../room/presets";
 import Footer from "../components/Footer";
+import { getCurrentUser } from "../users/currentUser";
+import { updateUser } from "../users/userDatabase";
 
 function RoomsPage() {
+    const currentUser = getCurrentUser();
+    const userId = currentUser?.id;
+    const roomStorageKey = userId ? `vidkeys-room-${userId}` : "vidkeys-room-guest";
+    const presetStorageKey = userId ? `vidkeys-presets-${userId}` : "vidkeys-presets-guest";
+
     const [presets, setPresets] = useState(() => {
-        const savedPresets = localStorage.getItem("vidkeys-presets");
+        const savedPresets = localStorage.getItem(presetStorageKey);
 
         if (savedPresets) {
             return JSON.parse(savedPresets);
@@ -17,8 +23,9 @@ function RoomsPage() {
 
         return defaultPresets;
     });
+
     const [room, setRoom] = useState(() => {
-        const savedRoom = localStorage.getItem("vidkeys-room");
+        const savedRoom = localStorage.getItem(roomStorageKey);
 
         if (savedRoom) {
             return JSON.parse(savedRoom);
@@ -28,18 +35,28 @@ function RoomsPage() {
     });
 
     useEffect(() => {
-        localStorage.setItem(
-            "vidkeys-room",
-            JSON.stringify(room)
-        );
-    }, [room]);
+        localStorage.setItem(roomStorageKey, JSON.stringify(room));
+
+        if (currentUser && currentUser.roomId !== room.roomName) {
+            updateUser({
+                ...currentUser,
+                roomId: room.roomName,
+                updatedAt: Date.now(),
+            });
+        }
+    }, [currentUser, room, roomStorageKey]);
 
     useEffect(() => {
-        localStorage.setItem(
-            "vidkeys-presets",
-            JSON.stringify(presets)
+        localStorage.setItem(presetStorageKey, JSON.stringify(presets));
+    }, [presets, presetStorageKey]);
+
+    if (!currentUser) {
+        return (
+            <AppLayout>
+                <div className="py-8 text-slate-300">Please log in to manage your room.</div>
+            </AppLayout>
         );
-    }, [presets]);
+    }
 
     return (
         <AppLayout>
@@ -53,9 +70,9 @@ function RoomsPage() {
                 </p>
 
                 <div className="mt-8">
-                    <RoomPreview 
+                    <RoomPreview
                         room={room}
-                        setRoom={setRoom} 
+                        setRoom={setRoom}
                         presets={presets}
                     />
                 </div>

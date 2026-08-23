@@ -1,4 +1,5 @@
 import { getUserById, removeFriend, removeFriendRequests, addFriend } from "../users/userDatabase";
+import { getCurrentUser } from "../users/currentUser";
 import { useNavigate } from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 import Footer from "../components/Footer";
@@ -13,11 +14,11 @@ function FriendsPage() {
     const [activeTab, setActiveTab] = useState<"friends" | "requests">(
         "friends"
     );
+    
+    const [, setRefresh] = useState(0);
 
-    const [user, setUser] = useState(() => getUserById("test"));
-    const [friendToRemove, setFriendToRemove] = useState<string | null>(null);
-
-    const currentUser = user;
+    const [friendToRemove, setFriendToRemove] = useState<string | null>(null)
+    const currentUser = getCurrentUser();
 
     if (!currentUser) {
         return null;
@@ -38,13 +39,7 @@ function FriendsPage() {
         }
 
         removeFriend(currentUser, friend);
-
-        setUser({
-            ...currentUser,
-            friends: currentUser.friends.filter(
-                (id) => id !== friendId
-            ),
-        });
+        setRefresh((value) => value + 1);
     };
 
     const handleAcceptRequest = (requestId: string) => {
@@ -55,12 +50,7 @@ function FriendsPage() {
         }
 
         addFriend(currentUser, request);
-
-        const updatedUser = getUserById(currentUser.id);
-
-        if (updatedUser) {
-            setUser(updatedUser);
-        }
+        setRefresh((value) => value + 1);
     };
 
     const handleDeclineRequest = (requestId: string) => {
@@ -71,12 +61,7 @@ function FriendsPage() {
         }
 
         removeFriendRequests(currentUser, request);
-
-        const updatedUser = getUserById(currentUser.id);
-
-        if (updatedUser) {
-            setUser(updatedUser);
-        }
+        setRefresh((value) => value + 1);
     };
 
     return (

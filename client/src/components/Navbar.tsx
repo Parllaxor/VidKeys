@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import type { Dispatch, SetStateAction } from "react";
+
 import { Menu, X } from "lucide-react";
 
 interface NavbarProps {
     menuOpen: boolean;
-    setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setMenuOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 function Navbar({

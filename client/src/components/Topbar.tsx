@@ -1,9 +1,9 @@
-import { getUserById } from "../users/userDatabase";
+import { getCurrentUser } from "../users/currentUser";
 import { useLocation } from "react-router-dom";
 
 function Topbar() {
 
-    const user = getUserById("test");
+    const user = getCurrentUser();
     const location = useLocation();
 
     if (!user) {

@@ -12,9 +12,13 @@ import FriendsPage from "./pages/FriendsPage";
 import SettingsPage from "./pages/SettingsPage";
 import AvatarSelector from "./components/AvatarSelector";
 
+const routerBasename = import.meta.env.BASE_URL === "/"
+  ? undefined
+  : import.meta.env.BASE_URL.replace(/\/$/, "");
+
 function App() {
   return (
-    <BrowserRouter basename="/VidKeys">
+    <BrowserRouter basename={routerBasename}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -22,10 +26,10 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/avatar" element={<AvatarSelector />} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/friends" element={<FriendsPage />} />
-        <Route path="/profile/avatar" element={<AvatarSelector />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

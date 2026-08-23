@@ -1,11 +1,15 @@
 import MainLayout from "../layouts/MainLayout";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Calendar } from "lucide-react";
 import { register } from "../users/authDatabase";
+import { useNavigate } from "react-router-dom";
+import { setCurrentUser } from "../users/currentUser";
 
 function RegisterPage() {
 
+    const navigate = useNavigate();
+    
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
     
@@ -15,7 +19,7 @@ function RegisterPage() {
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState(""); 
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         if (password !== passwordConfirm) {
@@ -23,14 +27,20 @@ function RegisterPage() {
             return;
         }
 
-        const result = register(
+        const registration = register(
             username,
             displayName,
             birthday,
             password
         );
-
-        console.log(result.message);
+        
+        console.log(registration.result.message);
+        
+        if (registration.result.success && registration.user) {
+            setCurrentUser(registration.user);
+            
+            navigate("/dashboard");
+        }
     }
 
     return (

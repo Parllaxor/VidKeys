@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Check, X, ZoomIn, ZoomOut } from "lucide-react";
 
 interface Props {
@@ -94,7 +94,7 @@ function AvatarCropper({ image, onSave, onCancel }: Props) {
         onSave(croppedImage);
     };
 
-    const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const handleMouseDown = (event: MouseEvent<HTMLCanvasElement>) => {
         setDragging(true);
 
         dragStart.current = {
@@ -108,7 +108,7 @@ function AvatarCropper({ image, onSave, onCancel }: Props) {
         };
     };
 
-    const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const handleMouseMove = (event: MouseEvent<HTMLCanvasElement>) => {
         if (!dragging || !imageRef.current) {
             return;
         }

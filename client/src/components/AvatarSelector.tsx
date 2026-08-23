@@ -2,9 +2,10 @@ import type { User } from "../users/user";
 import { avatars, getAvatarById } from "../users/avatars";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, ImagePlus, Sparkles, Trash2 } from "lucide-react";
-import { getUserById, updateUser } from "../users/userDatabase";
-import AvatarCropper from "./AvatarCropper"
+import { ArrowLeft, Check, ImagePlus, Sparkles, Trash2, User as UserIcon } from "lucide-react";
+import { updateUser } from "../users/userDatabase";
+import { getCurrentUser } from "../users/currentUser";
+import AvatarCropper from "./AvatarCropper";
 
 interface Props {
     user?: User;
@@ -13,12 +14,11 @@ interface Props {
 
 function AvatarSelector({ user: initialUser, onClose }: Props) {
     const navigate = useNavigate();
-    const [user, setUser] = useState<User | undefined>(() => initialUser ?? getUserById("test"));
+    const [user, setUser] = useState<User | undefined>(() => initialUser ?? getCurrentUser());
     const [avatarId, setAvatarId] = useState(user?.avatarId ?? "default");
     const [uploadedImage, setUploadedImage] = useState<string | null>(user?.avatarUrl ?? null);
-    const [uploadedAvatars, setUploadedAvatars] = useState<string[]>(
-        user?.uploadedAvatars ?? []
-    );
+    const [uploadedAvatars, setUploadedAvatars] = useState<string[]>(user?.uploadedAvatars ?? []);
+    const [cropImage, setCropImage] = useState<string | null>(null);
 
     if (!user) {
         return <div className="px-6 py-24 text-slate-300">User not found.</div>;
@@ -26,7 +26,6 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
 
     const previewImage = uploadedImage ?? getAvatarById(avatarId)?.image ?? getAvatarById(user.avatarId)?.image;
     const selectedAvatar = getAvatarById(avatarId) ?? getAvatarById(user.avatarId);
-    const [cropImage, setCropImage] = useState<string | null>(null);
 
     const handleSave = () => {
         const updatedUser: User = {
@@ -49,15 +48,11 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
     };
 
     const handleDelete = (avatarToDelete: string) => {
-
         if (avatarToDelete === uploadedImage) {
             return;
         }
 
-        const updatedAvatars = uploadedAvatars.filter(
-            (avatar) => avatar !== avatarToDelete
-        );
-
+        const updatedAvatars = uploadedAvatars.filter((avatar) => avatar !== avatarToDelete);
         const updatedUser: User = {
             ...user,
             uploadedAvatars: updatedAvatars,
@@ -94,19 +89,19 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
 
                         <div className="mt-6 rounded-3xl border border-slate-700 bg-slate-950/70 p-5">
                             <div className="flex items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 p-3 text-cyan-300">
-                                <img
-                                    src={previewImage}
-                                    alt={uploadedImage
-                                        ? "Custom avatar"
-                                        : selectedAvatar?.name ?? "Current avatar"}
-                                    className="h-24 w-24 rounded-full object-cover"
-                                />
+                                {previewImage ? (
+                                    <img
+                                        src={previewImage}
+                                        alt={uploadedImage ? "Custom avatar" : selectedAvatar?.name ?? "Current avatar"}
+                                        className="h-24 w-24 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <UserIcon className="h-24 w-24 rounded-full p-5 text-slate-400" />
+                                )}
                             </div>
                             <div className="mt-4 text-center">
                                 <p className="text-sm font-semibold text-white">
-                                    {uploadedImage
-                                        ? "Custom Avatar"
-                                        : selectedAvatar?.name ?? "Current avatar"}
+                                    {uploadedImage ? "Custom Avatar" : selectedAvatar?.name ?? "Current avatar"}
                                 </p>
                                 <p className="mt-1 text-sm text-slate-400">This will be shown throughout your profile and rooms.</p>
                             </div>
@@ -120,21 +115,15 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
                                     type="file"
                                     accept="image/*"
                                     className="sr-only"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
+                                    onChange={(event) => {
+                                        const file = event.target.files?.[0];
 
                                         if (!file) {
                                             return;
                                         }
 
                                         const reader = new FileReader();
-
-                                        reader.onload = () => {
-                                            const imageUrl = reader.result as string;
-
-                                            setCropImage(imageUrl);
-                                        };
-
+                                        reader.onload = () => setCropImage(reader.result as string);
                                         reader.readAsDataURL(file);
                                     }}
                                 />
@@ -155,10 +144,7 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
                                                 : "border-slate-700 bg-slate-950/70 hover:border-slate-500 hover:bg-slate-800/70"
                                         }`}
                                     >
-                                        <button
-                                            onClick={() => setUploadedImage(image)}
-                                            className="w-full text-left"
-                                        >
+                                        <button onClick={() => setUploadedImage(image)} className="w-full text-left">
                                             <div className="relative flex items-center justify-center">
                                                 <img
                                                     src={image}
@@ -253,22 +239,13 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
                     onCancel={() => setCropImage(null)}
                     onSave={(croppedImage) => {
                         setUploadedImage(croppedImage);
-
-                        setUploadedAvatars((previous) => {
-                            if (previous.includes(croppedImage)) {
-                                return previous;
-                            }
-
-                            return [...previous, croppedImage];
-                        });
-
+                        setUploadedAvatars((previous) => previous.includes(croppedImage) ? previous : [...previous, croppedImage]);
                         setCropImage(null);
                     }}
                 />
             )}
-
         </section>
     );
 }
 
-export default AvatarSelector
+export default AvatarSelector;
