@@ -83,28 +83,42 @@ function MainLayout({ children }: Props) {
                     </nav>
 
                     <div className="mt-auto flex flex-col gap-4">
-                        <button className="
-                            border border-cyan-400
-                            text-cyan-400
-                            rounded-lg
-                            py-2
-                            hover:bg-cyan-400
-                            hover:text-black
-                            transition
+                        <Link
+                            to="/login"
+                            onClick={() => setMenuOpen(false)}
+                                className="
+                                w-full
+                                border border-cyan-400
+                                text-cyan-400
+                                rounded-lg
+                                py-3
+                                text-center
+                                font-medium
+                                hover:bg-cyan-400
+                                hover:text-black
+                                transition
+                                duration-200
                         ">
                             Login
-                        </button>
+                        </Link>
 
-                        <button className="
-                            bg-cyan-400
-                            text-black
-                            rounded-lg
-                            py-2
-                            hover:bg-cyan-300
-                            transition
+                        <Link
+                            to="/register"
+                            onClick={() => setMenuOpen(false)}
+                                className="
+                                w-full
+                                bg-cyan-400
+                                text-black
+                                rounded-lg
+                                py-3
+                                text-center
+                                font-medium
+                                hover:bg-cyan-300
+                                transition
+                                duration-200
                         ">
                             Register
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

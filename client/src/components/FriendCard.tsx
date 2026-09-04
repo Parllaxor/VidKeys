@@ -164,6 +164,7 @@ function FriendCard({ friend, onRemove }: FriendCardProps) {
 
                 <button
                     type="button"
+                    onClick={() => navigate(`/chat/${friend.id}`)}
                     className="
                         flex-1
                         md:flex-none

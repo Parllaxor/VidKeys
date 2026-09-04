@@ -2,7 +2,7 @@ import { getAllUsers, sendFriendRequest, removeFriend, addFriend, removeFriendRe
 import { getCurrentUser } from "../users/currentUser"
 import type { User } from "../users/user";
 import { getAvatarById } from "../users/avatars";
-import { UserRound, UserPlus } from "lucide-react"
+import { UserRound, UserPlus, UserRoundMinus, CircleCheckBig } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import AppLayout from "../layouts/AppLayout";
@@ -30,6 +30,7 @@ function UsersPage() {
     const navigate = useNavigate();
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [friendToRemove, setFriendToRemove] = useState<User | null>(null);
+    const [, setRefresh] = useState(false);
 
     return (
         <AppLayout>
@@ -219,10 +220,13 @@ function UsersPage() {
                                                 setShowConfirmation(true);
                                             } else if (requestSent) {
                                                 removeFriendRequests(fromUser, toUser);
+                                                setRefresh((value) => !value);
                                             } else if (requestReceived) {
                                                 addFriend(fromUser, toUser);
+                                                setRefresh((value) => !value);
                                             } else {
                                                 sendFriendRequest(fromUser, toUser);
+                                                setRefresh((value) => !value);
                                             }
                                             
                                         }}
@@ -235,12 +239,12 @@ function UsersPage() {
                                             </>
                                         ) : requestSent ? (
                                             <>
-                                                <UserPlus className="h-4 w-4" />
+                                                <UserRoundMinus className="h-4 w-4" />
                                                 Cancel Request
                                             </>
                                         ) : requestReceived ? (
                                             <>
-                                                <UserPlus className="h-4 w-4" />
+                                                <CircleCheckBig className="h-4 w-4" />
                                                 Accept Request
                                             </>
                                         ) : (
@@ -275,6 +279,7 @@ function UsersPage() {
                     removeFriend(currentUser, friendToRemove);
                     setShowConfirmation(false);
                     setFriendToRemove(null);
+                    setRefresh((value) => !value);
                 }}  
                 onCancel={() => {
                     setShowConfirmation(false);

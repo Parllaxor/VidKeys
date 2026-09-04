@@ -15,10 +15,8 @@ function FriendsPage() {
         "friends"
     );
     
-    const [, setRefresh] = useState(0);
-
-    const [friendToRemove, setFriendToRemove] = useState<string | null>(null)
     const currentUser = getCurrentUser();
+    const [friendToRemove, setFriendToRemove] = useState<string | null>(null);
 
     if (!currentUser) {
         return null;
@@ -39,7 +37,7 @@ function FriendsPage() {
         }
 
         removeFriend(currentUser, friend);
-        setRefresh((value) => value + 1);
+        window.location.reload();
     };
 
     const handleAcceptRequest = (requestId: string) => {
@@ -50,7 +48,7 @@ function FriendsPage() {
         }
 
         addFriend(currentUser, request);
-        setRefresh((value) => value + 1);
+        window.location.reload();
     };
 
     const handleDeclineRequest = (requestId: string) => {
@@ -61,7 +59,7 @@ function FriendsPage() {
         }
 
         removeFriendRequests(currentUser, request);
-        setRefresh((value) => value + 1);
+        window.location.reload();
     };
 
     return (

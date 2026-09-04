@@ -6,6 +6,7 @@ import {
     Users,
     Settings,
     ContactRound,
+    MessageCircle,
     Menu,
     X,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const navItems = [
     { to: "/rooms", label: "Rooms", icon: DoorOpen },
     { to: "/users", label: "Users", icon: Users },
     { to: "/friends", label: "Friends", icon: ContactRound },
+    { to: "/chat", label: "Chats", icon: MessageCircle },
     { to: "/settings", label: "Settings", icon: Settings },
 ];
 

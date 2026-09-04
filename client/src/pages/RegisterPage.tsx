@@ -17,13 +17,16 @@ function RegisterPage() {
     const [displayName, setDisplayName] = useState("");
     const [birthday, setBirthday] = useState("");
     const [password, setPassword] = useState("");
-    const [passwordConfirm, setPasswordConfirm] = useState(""); 
+    const [passwordConfirm, setPasswordConfirm] = useState("");
+    const [error, setError] = useState("");
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
+        setError("");
+        
         if (password !== passwordConfirm) {
-            console.log("Passwords do not match.");
+            setError("Passwords do not match.");
             return;
         }
 
@@ -34,11 +37,13 @@ function RegisterPage() {
             password
         );
         
-        console.log(registration.result.message);
+        if (!registration.result.success) {
+            setError(registration.result.message);
+            return;
+        }
         
-        if (registration.result.success && registration.user) {
+        if (registration.user) {
             setCurrentUser(registration.user);
-            
             navigate("/dashboard");
         }
     }
@@ -258,6 +263,12 @@ function RegisterPage() {
                                     />
                                 </div>
 
+                                {error && (
+                                    <p className="text-sm text-red-400 text-center">
+                                           {error}
+                                    </p>
+                                )}
+            
                                 <button
                                     type="submit"
                                     className="

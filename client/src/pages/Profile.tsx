@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
     CalendarDays,
     ChevronDown,
@@ -15,7 +15,7 @@ import {
 import AppLayout from "../layouts/AppLayout";
 import Footer from "../components/Footer";
 import ProfileEditor from "./ProfileEditor";
-import { getCurrentUser } from "../users/currentUser";
+import { getCurrentUser, logout } from "../users/currentUser";
 import { getAvatarById } from "../users/avatars";
 import { getUserById, updateUser } from "../users/userDatabase";
 import type { User } from "../users/user";
@@ -48,6 +48,7 @@ const statusOptions = [
 ] as const;
 
 function Profile() {
+    const navigate = useNavigate();
     const { userId } = useParams();
     const currentUser = getCurrentUser();
     const [user, setUser] = useState<User | undefined>(() => getUserById(userId ?? currentUser?.id ?? ""));
@@ -103,6 +104,11 @@ function Profile() {
         setUser(updatedUser);
         setStatusOpen(false);
     };
+    
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    }
 
     if (editing) {
         return (
@@ -301,6 +307,14 @@ function Profile() {
                                         className="rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-black transition hover:bg-cyan-300"
                                     >
                                         Customize profile
+                                    </button>
+                                          
+                                    <button
+                                        type="button"
+                                        onClick={handleLogout}
+                                        className="rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/20"
+                                    >
+                                        Log Out
                                     </button>
                                 </div>
                             </div>

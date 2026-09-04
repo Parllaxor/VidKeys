@@ -14,27 +14,19 @@ function LoginPage() {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         const result = login(username, password);
-        
-        if (result.result.success && result.user) {
-            setCurrentUser(result.user);
-            
-            navigate("/dashboard");
-        }
 
         if (!result.result.success || !result.user) {
-            console.log(result.result.message);
+            setError(result.result.message);
             return;
         }
 
         setCurrentUser(result.user);
-
-        console.log(result.result.message);
-
         navigate("/dashboard");
     }
 
@@ -150,6 +142,12 @@ function LoginPage() {
                                         Forgot username or password?
                                     </button>
                                 </div>
+            
+                                {error && (
+                                    <p className="text-sm text-red-400">
+                                        {error}
+                                    </p>
+                                )}
 
                                 <button
                                     type="submit"
