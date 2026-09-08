@@ -2,7 +2,7 @@ import MainLayout from "../layouts/MainLayout";
 
 import { useState, type FormEvent } from "react";
 import { Calendar } from "lucide-react";
-import { register } from "../users/authDatabase";
+import { register } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { setCurrentUser } from "../users/currentUser";
 
@@ -20,7 +20,7 @@ function RegisterPage() {
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [error, setError] = useState("");
 
-    function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         setError("");
@@ -30,7 +30,7 @@ function RegisterPage() {
             return;
         }
 
-        const registration = register(
+        const registration = await register(
             username,
             displayName,
             birthday,

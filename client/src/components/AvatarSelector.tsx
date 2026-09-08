@@ -3,9 +3,9 @@ import { avatars, getAvatarById } from "../users/avatars";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, ImagePlus, Sparkles, Trash2, User as UserIcon } from "lucide-react";
-import { updateUser } from "../users/userDatabase";
 import { getCurrentUser } from "../users/currentUser";
 import AvatarCropper from "./AvatarCropper";
+import { supabase } from "../services/supabase";
 
 interface Props {
     user?: User;
@@ -27,16 +27,29 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
     const previewImage = uploadedImage ?? getAvatarById(avatarId)?.image ?? getAvatarById(user.avatarId)?.image;
     const selectedAvatar = getAvatarById(avatarId) ?? getAvatarById(user.avatarId);
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        const { error } = await supabase
+            .from("profiles")
+            .update({
+                avatar_id: avatarId,
+                avatar_url: uploadedImage,
+                uploaded_avatars: uploadedAvatars,
+                updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
+
+        if (error) {
+            console.error("Failed to update avatar:", error);
+            return;
+        }
+
         const updatedUser: User = {
             ...user,
             avatarId,
             avatarUrl: uploadedImage,
-            uploadedAvatars,
             updatedAt: Date.now(),
         };
 
-        updateUser(updatedUser);
         setUser(updatedUser);
 
         if (onClose) {
@@ -47,7 +60,7 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
         navigate("/profile");
     };
 
-    const handleDelete = (avatarToDelete: string) => {
+    const handleDelete = async (avatarToDelete: string) => {
         if (avatarToDelete === uploadedImage) {
             return;
         }
@@ -59,7 +72,19 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
             updatedAt: Date.now(),
         };
 
-        updateUser(updatedUser);
+        const { error } = await supabase
+            .from("profiles")
+            .update({
+                uploaded_avatars: updatedAvatars,
+                updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
+
+        if (error) {
+            console.error("Failed to delete avatar:", error);
+            return;
+        }
+
         setUser(updatedUser);
         setUploadedAvatars(updatedAvatars);
     };

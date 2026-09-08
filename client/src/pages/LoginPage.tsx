@@ -4,7 +4,7 @@ import MainLayout from "../layouts/MainLayout";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { login } from "../users/authDatabase";
+import { login } from "../services/authService";
 import { setCurrentUser } from "../users/currentUser";
 
 function LoginPage() {
@@ -16,10 +16,10 @@ function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        const result = login(username, password);
+        const result = await login(username, password);
 
         if (!result.result.success || !result.user) {
             setError(result.result.message);

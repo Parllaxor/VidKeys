@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 
 import AppLayout from "../layouts/AppLayout";
 import { getCurrentUser } from "../users/currentUser";
-import { getUserById } from "../users/userDatabase";
 import {
     getMessagesBetweenUsers,
     sendMessage,
 } from "../messages/messageDatabase";
+import type { User } from "../users/user";
+import { supabase } from "../services/supabase";
 
 import type { Message } from "../messages/message";
 
@@ -15,26 +16,73 @@ function ChatPage() {
     const { friendId } = useParams<{ friendId: string }>();
 
     const currentUser = getCurrentUser();
-    const friend = friendId ? getUserById(friendId) : undefined;
 
     const [messageText, setMessageText] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
+    const [friend, setFriend] = useState<User | undefined>(undefined);
 
     useEffect(() => {
         if (!currentUser || !friendId) {
             setMessages([]);
+            setFriend(undefined);
             return;
         }
 
-        const updateMessages = () => {
-            setMessages(
-                getMessagesBetweenUsers(currentUser.id, friendId)
-            );
+        const loadFriend = async () => {
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", friendId)
+                .single();
+
+            if (error || !data) {
+                console.error("Failed to load friend:", error);
+                setFriend(undefined);
+                return;
+            }
+
+            setFriend({
+                id: data.id,
+                username: data.username,
+                displayName: data.display_name,
+                bio: data.bio,
+                birthday: data.birthday,
+                avatarId: data.avatar_id,
+                avatarUrl: data.avatar_url,
+                uploadedAvatars: [],
+                status: data.status,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at,
+                lastActive: data.last_active,
+                friends: [],
+                sentRequests: [],
+                receivedRequests: [],
+                blockedUsers: [],
+                reports: [],
+                roomId: null,
+                roomsCreated: data.rooms_created,
+                roomsVisited: data.rooms_visited,
+                totalCallMinutes: data.total_call_minutes,
+                gamesPlayed: data.games_played,
+                achievementsUnlocked: data.achievements_unlocked,
+                favoriteTheme: data.favorite_theme,
+                reputation: data.reputation,
+            });
         };
 
-        updateMessages();
+        loadFriend();
 
-        const interval = setInterval(updateMessages, 1000);
+    const updateMessages = async () => {
+        const loadedMessages = await getMessagesBetweenUsers(
+            currentUser.id,
+            friendId
+        );
+        setMessages(loadedMessages);
+    };
+
+    updateMessages();
+
+    const interval = setInterval(updateMessages, 5000);
 
         return () => {
             clearInterval(interval);
@@ -57,14 +105,14 @@ function ChatPage() {
         );
     }
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         const content = messageText.trim();
 
         if (!content) {
             return;
         }
 
-        const newMessage = sendMessage(
+        const newMessage = await sendMessage(
             currentUser.id,
             friend.id,
             content

@@ -1,13 +1,14 @@
-import { getAllUsers, sendFriendRequest, removeFriend, addFriend, removeFriendRequests } from "../users/userDatabase";
+import { sendFriendRequest, removeFriend, addFriend, removeFriendRequests } from "../users/userDatabase";
 import { getCurrentUser } from "../users/currentUser"
 import type { User } from "../users/user";
 import { getAvatarById } from "../users/avatars";
 import { UserRound, UserPlus, UserRoundMinus, CircleCheckBig } from "lucide-react"
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppLayout from "../layouts/AppLayout";
 import ConfirmationModal from "../components/ConfirmationModal";
 import Footer from "../components/Footer";
+import { supabase } from "../services/supabase";
 
 function UsersPage() {
     const statusLabels = {
@@ -17,8 +18,13 @@ function UsersPage() {
         dnd: "Do Not Disturb",
     };
 
-    const users = getAllUsers();
+    const [users, setUsers] = useState<User[]>([]);
+
     const currentUser = getCurrentUser();
+    const [friendIds, setFriendIds] = useState<string[]>([]);
+    const [sentRequestIds, setSentRequestIds] = useState<string[]>([]);
+    const [receivedRequestIds, setReceivedRequestIds] = useState<string[]>([]);
+
     const currentUserId = currentUser?.id;
 
     const sortedUsers = [...users].sort((a, b) => {
@@ -30,7 +36,86 @@ function UsersPage() {
     const navigate = useNavigate();
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [friendToRemove, setFriendToRemove] = useState<User | null>(null);
-    const [, setRefresh] = useState(false);
+    const [refresh, setRefresh] = useState(false);
+
+    useEffect(() => {
+        async function loadUsers() {
+
+            const { data: friendships, error: friendshipError } = await supabase
+                .from("friendships")
+                .select("friend_id")
+                .eq("user_id", currentUser?.id);
+
+            if (friendshipError) {
+                console.error("Failed to load friendships:", friendshipError);
+            } else {
+                setFriendIds(friendships.map((friendship) => friendship.friend_id));
+            }
+
+            const { data: sentRequests, error: sentRequestError } = await supabase
+                .from("friend_requests")
+                .select("receiver_id")
+                .eq("sender_id", currentUser?.id);
+
+            if (sentRequestError) {
+                console.error("Failed to load sent friend requests:", sentRequestError);
+            } else {
+                setSentRequestIds(sentRequests.map((request) => request.receiver_id));
+            }
+
+            const { data: receivedRequests, error: receivedRequestError } = await supabase
+                .from("friend_requests")
+                .select("sender_id")
+                .eq("receiver_id", currentUser?.id);
+
+            if (receivedRequestError) {
+                console.error("Failed to load received friend requests:", receivedRequestError);
+            } else {
+                setReceivedRequestIds(receivedRequests.map((request) => request.sender_id));
+            }
+
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("*");
+
+            if (error) {
+                console.error("Failed to load users:", error);
+                return;
+            }
+
+            const loadedUsers: User[] = data.map((profile) => ({
+                id: profile.id,
+                username: profile.username,
+                displayName: profile.display_name,
+                bio: profile.bio,
+                birthday: profile.birthday,
+                avatarId: profile.avatar_id,
+                avatarUrl: profile.avatar_url,
+                uploadedAvatars: [],
+                status: profile.status,
+                lastActive: new Date(profile.last_active).getTime(),
+                createdAt: new Date(profile.created_at).getTime(),
+                updatedAt: new Date(profile.updated_at).getTime(),
+                friends: [],
+                sentRequests: [],
+                receivedRequests: [],
+                blockedUsers: [],
+                reports: [],
+                roomId: null,
+                roomsCreated: profile.rooms_created,
+                roomsVisited: profile.rooms_visited,
+                totalCallMinutes: profile.total_call_minutes,
+                gamesPlayed: profile.games_played,
+                achievementsUnlocked: profile.achievements_unlocked,
+                favoriteTheme: profile.favorite_theme,
+                reputation: profile.reputation,
+            }));
+
+            setUsers(loadedUsers);
+        }
+
+        loadUsers();
+    }, [refresh]);
 
     return (
         <AppLayout>
@@ -51,9 +136,9 @@ function UsersPage() {
 
                     const isCurrentUser = user.id === currentUserId;
 
-                    const isFriend = currentUser?.friends.includes(user.id);
-                    const requestSent = currentUser?.sentRequests.includes(user.id);
-                    const requestReceived = currentUser?.receivedRequests.includes(user.id);
+                    const isFriend = friendIds.includes(user.id);
+                    const requestSent = sentRequestIds.includes(user.id);
+                    const requestReceived = receivedRequestIds.includes(user.id);
                     //const isBlocked = currentUser?.blockedUsers.includes(user.id);
 
                     return (
@@ -207,7 +292,7 @@ function UsersPage() {
 
                                     <button
                                         type="button"
-                                        onClick={() => {
+                                        onClick={async () => {
                                             const fromUser = currentUser;
                                             const toUser = user;
 
@@ -219,13 +304,13 @@ function UsersPage() {
                                                 setFriendToRemove(toUser);
                                                 setShowConfirmation(true);
                                             } else if (requestSent) {
-                                                removeFriendRequests(fromUser, toUser);
+                                                await removeFriendRequests(fromUser, toUser);
                                                 setRefresh((value) => !value);
                                             } else if (requestReceived) {
-                                                addFriend(fromUser, toUser);
+                                                await addFriend(fromUser, toUser);
                                                 setRefresh((value) => !value);
                                             } else {
-                                                sendFriendRequest(fromUser, toUser);
+                                                await sendFriendRequest(fromUser, toUser);
                                                 setRefresh((value) => !value);
                                             }
                                             
@@ -271,12 +356,12 @@ function UsersPage() {
                         : "Are you sure you want to remove this user from your friends?"
                 }
                 confirmText="Remove Friend"
-                onConfirm={() => {
+                onConfirm={async () => {
                     if (!currentUser || !friendToRemove) {
                         return;
                     }
 
-                    removeFriend(currentUser, friendToRemove);
+                    await removeFriend(currentUser, friendToRemove);
                     setShowConfirmation(false);
                     setFriendToRemove(null);
                     setRefresh((value) => !value);

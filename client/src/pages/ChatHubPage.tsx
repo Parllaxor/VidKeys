@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../layouts/AppLayout";
 import { getCurrentUser } from "../users/currentUser";
-import { getUserById } from "../users/userDatabase";
 import { getAvatarById } from "../users/avatars";
+import type { User } from "../users/user";
+import { supabase } from "../services/supabase";
 
 function ChatHubPage() {
     const { friendId } = useParams<{ friendId: string }>();
@@ -18,9 +19,70 @@ function ChatHubPage() {
         return null;
     }
 
-    const friends = currentUser.friends
-        .map((id) => getUserById(id))
-        .filter((friend) => friend !== undefined);
+    const [friends, setFriends] = useState<User[]>([]);
+
+        useEffect(() => {
+            const loadFriends = async () => {
+                const { data: friendships, error } = await supabase
+                    .from("friendships")
+                    .select("friend_id")
+                    .eq("user_id", currentUser.id);
+
+                if (error) {
+                    console.error("Failed to load friends:", error);
+                    return;
+                }
+
+                const friendIds = friendships.map((friendship) => friendship.friend_id);
+
+                if (friendIds.length === 0) {
+                    setFriends([]);
+                    return;
+                }
+
+                const { data: profiles, error: profileError } = await supabase
+                    .from("profiles")
+                    .select("*")
+                    .in("id", friendIds);
+
+                if (profileError) {
+                    console.error("Failed to load friend profiles:", profileError);
+                    return;
+                }
+
+                const loadedFriends: User[] = profiles.map((profile) => ({
+                    id: profile.id,
+                    username: profile.username,
+                    displayName: profile.display_name,
+                    bio: profile.bio,
+                    birthday: profile.birthday,
+                    avatarId: profile.avatar_id,
+                    avatarUrl: profile.avatar_url,
+                    uploadedAvatars: [],
+                    status: profile.status,
+                    createdAt: profile.created_at,
+                    updatedAt: profile.updated_at,
+                    lastActive: profile.last_active,
+                    friends: [],
+                    sentRequests: [],
+                    receivedRequests: [],
+                    blockedUsers: [],
+                    reports: [],
+                    roomId: null,
+                    roomsCreated: profile.rooms_created,
+                    roomsVisited: profile.rooms_visited,
+                    totalCallMinutes: profile.total_call_minutes,
+                    gamesPlayed: profile.games_played,
+                    achievementsUnlocked: profile.achievements_unlocked,
+                    favoriteTheme: profile.favorite_theme,
+                    reputation: profile.reputation,
+                }));
+
+                setFriends(loadedFriends);
+            };
+
+            loadFriends();
+        }, [currentUser.id]);
 
     const filteredFriends = friends.filter((friend) =>
         friend.displayName

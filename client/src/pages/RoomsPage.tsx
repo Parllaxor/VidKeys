@@ -6,7 +6,7 @@ import RoomCustomizer from "../components/RoomCustomizer";
 import { defaultPresets } from "../room/presets";
 import Footer from "../components/Footer";
 import { getCurrentUser } from "../users/currentUser";
-import { updateUser } from "../users/userDatabase";
+import { supabase } from "../services/supabase";
 
 function RoomsPage() {
     const currentUser = getCurrentUser();
@@ -38,11 +38,13 @@ function RoomsPage() {
         localStorage.setItem(roomStorageKey, JSON.stringify(room));
 
         if (currentUser && currentUser.roomId !== room.roomName) {
-            updateUser({
-                ...currentUser,
-                roomId: room.roomName,
-                updatedAt: Date.now(),
-            });
+            supabase
+                .from("profiles")
+                .update({
+                    room_id: room.roomName,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq("id", currentUser.id);
         }
     }, [currentUser, room, roomStorageKey]);
 

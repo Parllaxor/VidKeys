@@ -1,9 +1,9 @@
-import { getUserById } from "../users/userDatabase";
 import { getAvatarById } from "../users/avatars";
 import { User as UserIcon } from "lucide-react";
+import type { User } from "../users/user";
 
 interface FriendRequestsProps {
-    requests: string[];
+    requests: User[];
     onAccept: (requestId: string) => void;
     onDecline: (requestId: string) => void;
     onViewProfile: (requestId: string) => void;
@@ -16,14 +16,7 @@ function FriendRequests({
     onViewProfile,
 }: FriendRequestsProps) {
 
-    const requestUsers = requests
-        .map((requestId) => getUserById(requestId))
-        .filter(
-            (request): request is NonNullable<typeof request> =>
-                request !== undefined
-        );
-
-    if (requestUsers.length === 0) {
+    if (requests.length === 0) {
         return (
             <div className="rounded-2xl border border-slate-700 bg-[#111827] p-8 text-center">
                 <p className="text-slate-400">
@@ -35,7 +28,7 @@ function FriendRequests({
 
     return (
         <div className="grid gap-4">
-            {requestUsers.map((request) => {
+            {requests.map((request) => {
                 const avatar = getAvatarById(request.avatarId);
 
                 return (

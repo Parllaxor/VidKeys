@@ -1,4 +1,6 @@
 import {BrowserRouter, Routes, Route } from "react-router-dom";
+import {useEffect} from "react";
+import {restoreCurrentUser} from "./users/currentUser";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -20,6 +22,10 @@ const routerBasename = import.meta.env.BASE_URL === "/"
   : import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function App() {
+  useEffect(() => {
+    restoreCurrentUser();
+  }, []);
+
   return (
     <BrowserRouter basename={routerBasename}>
       <Routes>

@@ -1,157 +1,74 @@
-import { type User, testUser, testUser2, testUser3 } from "./user"
-import { loadUsers, saveUsers } from "./userStorage";
-
-let users: User[] = loadUsers();
-
-if (users.length === 0) {
-    users = [testUser, testUser2, testUser3];
-    saveUsers(users);
-}
-
-{/* Get Users */}
-export function getUserById(id: string): User | undefined {
-    return users.find((user) => user.id === id);
-}
-
-export function getUserByUsername(username: string): User | undefined {
-    return users.find((user) => user.username === username);
-}
-
-export function getAllUsers(): User[] {
-    return [...users];
-}
-
-{/* Update Users */}
-export function updateUser(updatedUser: User) {
-    users = users.map((user) =>
-        user.id === updatedUser.id ? updatedUser : user
-    );
-
-    saveUsers(users);
-}
-
-{/* Create Users */}
-export function createUser(user: User): ActionResult {
-    if (users.some((u) => u.id === user.id)) {
-        return {
-            success: false,
-            message: "User ID taken."
-        };
-    }
-
-    if (users.some((u) => u.username === user.username)) {
-        return {
-            success: false,
-            message: "Username already taken."
-        };
-    }
-    
-    users.push(user);
-    saveUsers(users);
-
-    return {
-        success: true,
-        message: `Welcome to VidKeys, ${user.username}!`
-    };
-}
-
-export function createDefaultUser (
-    username: string,
-    displayName: string,
-    birthday: string,
-): {result: ActionResult; user?: User} {
-    const user: User = {
-        id: crypto.randomUUID(),
-        username,
-        displayName,
-        bio: "",
-        birthday: birthday,
-        avatarId: "default",
-        avatarUrl: null,
-        uploadedAvatars: [],
-        status: "offline",
-        lastActive: Date.now(),
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        friends: [],
-        sentRequests: [],
-        receivedRequests: [],
-        blockedUsers: [],
-        reports: [],
-        roomId: null,
-        roomsCreated: 0,
-        roomsVisited: 0,
-        totalCallMinutes: 0,
-        gamesPlayed: 0,
-        achievementsUnlocked: 0,
-        favoriteTheme: "default",
-        reputation: 0,
-    };
-
-    const result = createUser(user);
-
-    if (!result.success) {
-        return { result };
-    }
-
-    return {
-        result,
-        user
-    };
-}
-
-{/* Delete Users */}
-export function deleteUser(user: User) {
-    if (!users.some((u) => u.id === user.id)) {
-        return;
-    }
-
-    users = users.filter((u) => u.id !== user.id);
-    saveUsers(users);
-}
+import { type User } from "./user"
+import { supabase } from "../services/supabase";
 
 {/* Friend Utility */}
-export function sendFriendRequest(fromUser: User, toUser: User) : ActionResult {
+export async function sendFriendRequest(
+    fromUser: User,
+    toUser: User
+): Promise<ActionResult> {
+
     if (fromUser.id === toUser.id) {
         return {
             success: false,
             message: "ERROR: Cannot send friend request to yourself."
         };
-    } else if (!users.some((u) => u.id === fromUser.id) || !users.some((u) => u.id === toUser.id)) {
+    }
+
+    const { data: existingRequest } = await supabase
+        .from("friend_requests")
+        .select("id")
+        .or(
+            `and(sender_id.eq.${fromUser.id},receiver_id.eq.${toUser.id}),and(sender_id.eq.${toUser.id},receiver_id.eq.${fromUser.id})`
+        )
+        .maybeSingle();
+
+    if (existingRequest) {
         return {
             success: false,
-            message: "ERROR: User not found."
-        };
-    } else if (toUser.receivedRequests.includes(fromUser.id) || fromUser.sentRequests.includes(toUser.id)) {
-        return {
-            success: false,
-            message: `Request previously sent to ${toUser}.`
-        };
-    } else if (fromUser.receivedRequests.includes(toUser.id) || toUser.sentRequests.includes(fromUser.id)) {
-        return {
-            success: false,
-            message: `Request already received from ${toUser}.`
-        };
-    } else if (fromUser.friends.includes(toUser.id) || toUser.friends.includes(fromUser.id)) {
-        return {
-            success: false,
-            message: `Already friends with ${toUser}.`
+            message: "Friend request already exists."
         };
     }
 
-    fromUser.sentRequests.push(toUser.id);
-    toUser.receivedRequests.push(fromUser.id);
+    const { data: existingFriendship } = await supabase
+        .from("friendships")
+        .select("id")
+        .or(
+            `and(user_id.eq.${fromUser.id},friend_id.eq.${toUser.id}),and(user_id.eq.${toUser.id},friend_id.eq.${fromUser.id})`
+        )
+        .maybeSingle();
 
-    updateUser(fromUser);
-    updateUser(toUser);
+    if (existingFriendship) {
+        return {
+            success: false,
+            message: "Already friends."
+        };
+    }
+
+    const { error } = await supabase
+        .from("friend_requests")
+        .insert({
+            sender_id: fromUser.id,
+            receiver_id: toUser.id
+        });
+
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
 
     return {
         success: true,
-        message: `Successfully sent friend request to ${toUser}!`
+        message: `Successfully sent friend request to ${toUser.displayName}!`
     };
 }
 
-export function removeFriendRequests(fromUser: User, toUser: User) : ActionResult {
+export async function removeFriendRequests(
+    fromUser: User,
+    toUser: User
+): Promise<ActionResult> {
+
     if (fromUser.id === toUser.id) {
         return {
             success: false,
@@ -159,143 +76,260 @@ export function removeFriendRequests(fromUser: User, toUser: User) : ActionResul
         };
     }
 
-    if (fromUser.receivedRequests.includes(toUser.id)) {
-        fromUser.receivedRequests = fromUser.receivedRequests.filter(
-            (friendId) => friendId !== toUser.id);
-        toUser.sentRequests = toUser.sentRequests.filter(
-            (friendId) => friendId !== fromUser.id);
-    } else if (toUser.receivedRequests.includes(fromUser.id)) {
-        toUser.receivedRequests = toUser.receivedRequests.filter(
-            (friendId) => friendId !== fromUser.id);
-        fromUser.sentRequests = fromUser.sentRequests.filter(
-            (friendId) => friendId !== toUser.id);
-    }
+    const { error } = await supabase
+        .from("friend_requests")
+        .delete()
+        .or(
+            `and(sender_id.eq.${fromUser.id},receiver_id.eq.${toUser.id}),and(sender_id.eq.${toUser.id},receiver_id.eq.${fromUser.id})`
+        );
 
-    updateUser(toUser);
-    updateUser(fromUser);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
 
     return {
         success: true,
-        message: `Friend request from ${toUser} successfully removed.`
+        message: "Friend request successfully removed."
     };
 }
 
-export function addFriend(fromUser: User, toUser: User) : ActionResult {
+export async function addFriend(
+    fromUser: User,
+    toUser: User
+): Promise<ActionResult> {
+
     if (fromUser.id === toUser.id) {
         return {
             success: false,
             message: "ERROR: Cannot friend yourself."
         };
-    } else if (fromUser.blockedUsers.includes(toUser.id) || toUser.blockedUsers.includes(fromUser.id)) {
-        return {
-            success: false,
-            message: `${toUser} could not be added as a friend.`
-        };
-    } else if (!fromUser.receivedRequests.includes(toUser.id) && !toUser.receivedRequests.includes(fromUser.id)) {
-        return sendFriendRequest(fromUser, toUser);
     }
 
-    fromUser.friends.push(toUser.id);
-    toUser.friends.push(fromUser.id)
+    // Make sure the request actually exists
+    const { data: request, error: requestError } = await supabase
+        .from("friend_requests")
+        .select("id")
+        .eq("sender_id", toUser.id)
+        .eq("receiver_id", fromUser.id)
+        .maybeSingle();
 
-    removeFriendRequests(toUser, fromUser);
+    if (requestError) {
+        return {
+            success: false,
+            message: requestError.message
+        };
+    }
 
-    updateUser(fromUser);
-    updateUser(toUser);
+    if (!request) {
+        return {
+            success: false,
+            message: "Friend request does not exist."
+        };
+    }
+
+    // Create the friendship in both directions
+    const { error: friendshipError } = await supabase
+        .from("friendships")
+        .insert([
+            {
+                user_id: fromUser.id,
+                friend_id: toUser.id
+            },
+            {
+                user_id: toUser.id,
+                friend_id: fromUser.id
+            }
+        ]);
+
+    if (friendshipError) {
+        return {
+            success: false,
+            message: friendshipError.message
+        };
+    }
+
+    // Remove the original request
+    const { error: deleteError } = await supabase
+        .from("friend_requests")
+        .delete()
+        .eq("id", request.id);
+
+    if (deleteError) {
+        return {
+            success: false,
+            message: deleteError.message
+        };
+    }
 
     return {
         success: true,
-        message: `Successfully added ${toUser} as a friend!`
+        message: `You are now friends with ${toUser.displayName}!`
     };
 }
 
-export function removeFriend(fromUser: User, toUser: User) : ActionResult {
+export async function removeFriend(
+    fromUser: User,
+    toUser: User
+): Promise<ActionResult> {
+
     if (fromUser.id === toUser.id) {
         return {
             success: false,
-            message: "ERROR: Cannot friend yourself."
-        };
-    } else if (!fromUser.friends.includes(toUser.id) || !toUser.friends.includes(fromUser.id)) {
-        return {
-            success: false,
-            message: `Not currently friends with ${toUser}.`
+            message: "ERROR: Cannot remove yourself as a friend."
         };
     }
 
-    fromUser.friends = fromUser.friends.filter(
-        (friendId) => friendId !== toUser.id);
-    toUser.friends = toUser.friends.filter(
-        (friendId) => friendId !== fromUser.id);
+    const { error } = await supabase
+        .from("friendships")
+        .delete()
+        .or(
+            `and(user_id.eq.${fromUser.id},friend_id.eq.${toUser.id}),and(user_id.eq.${toUser.id},friend_id.eq.${fromUser.id})`
+        );
 
-    updateUser(fromUser);
-    updateUser(toUser);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
 
     return {
         success: true,
-        message: `${toUser} has been removed from your friends list.`
+        message: `${toUser.displayName} has been removed from your friends list.`
     };
 }
 
-export function blockUser(fromUser: User, toUser: User) : ActionResult {
+export async function blockUser(
+    fromUser: User,
+    toUser: User
+): Promise<ActionResult> {
+
     if (fromUser.id === toUser.id) {
         return {
             success: false,
             message: "ERROR: Cannot block yourself."
         };
-    } else if (fromUser.blockedUsers.includes(toUser.id)) {
+    }
+
+    const { data: existingBlock } = await supabase
+        .from("blocked_users")
+        .select("id")
+        .eq("blocker_id", fromUser.id)
+        .eq("blocked_id", toUser.id)
+        .maybeSingle();
+
+    if (existingBlock) {
         return {
             success: false,
-            message: `${toUser} already blocked.`
+            message: `${toUser.displayName} already blocked.`
         };
     }
 
-    fromUser.blockedUsers.push(toUser.id);
+    const { error: blockError } = await supabase
+        .from("blocked_users")
+        .insert({
+            blocker_id: fromUser.id,
+            blocked_id: toUser.id
+        });
 
-    removeFriend(fromUser, toUser);
-    removeFriendRequests(fromUser, toUser);
+    if (blockError) {
+        return {
+            success: false,
+            message: blockError.message
+        };
+    }
 
-    updateUser(toUser);
-    updateUser(fromUser);
+    // Remove any friendship
+    await removeFriend(fromUser, toUser);
+
+    // Remove any friend request
+    await removeFriendRequests(fromUser, toUser);
 
     return {
         success: true,
-        message: `Successfully blocked ${toUser}.`
+        message: `Successfully blocked ${toUser.displayName}.`
     };
 }
 
-export function removeBlockedUser(fromUser: User, toUser: User) : ActionResult {
+export async function removeBlockedUser(
+    fromUser: User,
+    toUser: User
+): Promise<ActionResult> {
+
     if (fromUser.id === toUser.id) {
         return {
             success: false,
             message: "ERROR: Should not be possible to block yourself in the first place."
         };
-    } else if (!fromUser.blockedUsers.includes(toUser.id)) {
+    }
+
+    const { data: existingBlock } = await supabase
+        .from("blocked_users")
+        .select("id")
+        .eq("blocker_id", fromUser.id)
+        .eq("blocked_id", toUser.id)
+        .maybeSingle();
+
+    if (!existingBlock) {
         return {
             success: false,
-            message: `${toUser} not currently blocked.`
+            message: `${toUser.displayName} not currently blocked.`
         };
     }
 
-    fromUser.blockedUsers = fromUser.blockedUsers.filter(
-        (blockedId) => blockedId !== toUser.id);
+    const { error } = await supabase
+        .from("blocked_users")
+        .delete()
+        .eq("id", existingBlock.id);
 
-    updateUser(fromUser);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
 
     return {
         success: true,
-        message: `Successfully unblocked ${toUser}!`
+        message: `Successfully unblocked ${toUser.displayName}!`
     };
 }
 
-export function reportUser(fromUser: User, toUser: User, report: string) {
-    toUser.reports.push(fromUser.id + " " + report);
+export async function reportUser(
+    fromUser: User,
+    toUser: User,
+    report: string
+): Promise<ActionResult> {
 
-    updateUser(toUser);
-}
+    if (fromUser.id === toUser.id) {
+        return {
+            success: false,
+            message: "ERROR: Cannot report yourself."
+        };
+    }
 
-{/* Other Utility */}
-export function userExists(id: string) {
-    return users.some((user) => user.id === id);
+    const { error } = await supabase
+        .from("user_reports")
+        .insert({
+            reporter_id: fromUser.id,
+            reported_id: toUser.id,
+            report
+        });
+
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
+
+    return {
+        success: true,
+        message: `Successfully reported ${toUser.displayName}.`
+    };
 }
 
 export interface ActionResult {

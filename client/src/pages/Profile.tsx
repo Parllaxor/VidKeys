@@ -17,8 +17,8 @@ import Footer from "../components/Footer";
 import ProfileEditor from "./ProfileEditor";
 import { getCurrentUser, logout } from "../users/currentUser";
 import { getAvatarById } from "../users/avatars";
-import { getUserById, updateUser } from "../users/userDatabase";
 import type { User } from "../users/user";
+import { supabase } from "../services/supabase";
 
 const statusOptions = [
     {
@@ -51,18 +51,120 @@ function Profile() {
     const navigate = useNavigate();
     const { userId } = useParams();
     const currentUser = getCurrentUser();
-    const [user, setUser] = useState<User | undefined>(() => getUserById(userId ?? currentUser?.id ?? ""));
+    const [user, setUser] = useState<User | undefined>();
+    const [friends, setFriends] = useState<User[]>([]);
     const [editing, setEditing] = useState(false);
     const [statusOpen, setStatusOpen] = useState(false);
     const statusRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!currentUser) {
-            setUser(undefined);
-            return;
+        async function loadUser() {
+            if (!currentUser) {
+                setUser(undefined);
+                return;
+            }
+
+            const id = userId ?? currentUser.id;
+
+            const { data: profile, error } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", id)
+                .single();
+
+            if (error || !profile) {
+                console.error("Failed to load profile:", error);
+                setUser(undefined);
+                return;
+            }
+
+            setUser({
+                id: profile.id,
+                username: profile.username,
+                displayName: profile.display_name,
+                bio: profile.bio,
+                birthday: profile.birthday,
+                avatarId: profile.avatar_id,
+                avatarUrl: profile.avatar_url,
+                uploadedAvatars: [],
+                status: profile.status,
+                createdAt: new Date(profile.created_at).getTime(),
+                updatedAt: new Date(profile.updated_at).getTime(),
+                lastActive: new Date(profile.last_active).getTime(),
+                friends: [],
+                sentRequests: [],
+                receivedRequests: [],
+                blockedUsers: [],
+                reports: [],
+                roomId: null,
+                roomsCreated: profile.rooms_created,
+                roomsVisited: profile.rooms_visited,
+                totalCallMinutes: profile.total_call_minutes,
+                gamesPlayed: profile.games_played,
+                achievementsUnlocked: profile.achievements_unlocked,
+                favoriteTheme: profile.favorite_theme,
+                reputation: profile.reputation,
+            });
+
+            const { data: friendships, error: friendshipError } = await supabase
+                .from("friendships")
+                .select("friend_id")
+                .eq("user_id", id);
+
+            if (friendshipError) {
+                console.error("Failed to load friendships:", friendshipError);
+                return;
+            }
+
+            const friendIds = friendships.map((friendship) => friendship.friend_id);
+
+            if (friendIds.length === 0) {
+                setFriends([]);
+                return;
+            }
+
+            const { data: friendProfiles, error: friendProfilesError } = await supabase
+                .from("profiles")
+                .select("*")
+                .in("id", friendIds);
+
+            if (friendProfilesError) {
+                console.error("Failed to load friend profiles:", friendProfilesError);
+                return;
+            }
+
+            setFriends(
+                friendProfiles.map((profile) => ({
+                    id: profile.id,
+                    username: profile.username,
+                    displayName: profile.display_name,
+                    bio: profile.bio,
+                    birthday: profile.birthday,
+                    avatarId: profile.avatar_id,
+                    avatarUrl: profile.avatar_url,
+                    uploadedAvatars: [],
+                    status: profile.status,
+                    createdAt: new Date(profile.created_at).getTime(),
+                    updatedAt: new Date(profile.updated_at).getTime(),
+                    lastActive: new Date(profile.last_active).getTime(),
+                    friends: [],
+                    sentRequests: [],
+                    receivedRequests: [],
+                    blockedUsers: [],
+                    reports: [],
+                    roomId: null,
+                    roomsCreated: profile.rooms_created,
+                    roomsVisited: profile.rooms_visited,
+                    totalCallMinutes: profile.total_call_minutes,
+                    gamesPlayed: profile.games_played,
+                    achievementsUnlocked: profile.achievements_unlocked,
+                    favoriteTheme: profile.favorite_theme,
+                    reputation: profile.reputation,
+                }))
+            );
         }
 
-        setUser(getUserById(userId ?? currentUser.id));
+        loadUser();
     }, [userId, currentUser?.id]);
 
     useEffect(() => {
@@ -93,15 +195,26 @@ function Profile() {
     const lastActive = new Date(user.lastActive).toLocaleString();
     const updatedAt = new Date(user.updatedAt).toLocaleDateString();
 
-    const handleStatusChange = (status: User["status"]) => {
-        const updatedUser = {
+    const handleStatusChange = async (status: User["status"]) => {
+        const { error } = await supabase
+            .from("profiles")
+            .update({
+                status,
+                updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
+
+        if (error) {
+            console.error("Failed to update status:", error);
+            return;
+        }
+
+        setUser({
             ...user,
             status,
             updatedAt: Date.now(),
-        };
+        });
 
-        updateUser(updatedUser);
-        setUser(updatedUser);
         setStatusOpen(false);
     };
     
@@ -116,8 +229,21 @@ function Profile() {
                 <ProfileEditor
                     user={user}
                     onClose={() => setEditing(false)}
-                    onSave={(updatedUser) => {
-                        updateUser(updatedUser);
+                    onSave={async (updatedUser) => {
+                        const { error } = await supabase
+                            .from("profiles")
+                            .update({
+                                display_name: updatedUser.displayName,
+                                bio: updatedUser.bio,
+                                updated_at: new Date().toISOString(),
+                            })
+                            .eq("id", updatedUser.id);
+
+                        if (error) {
+                            console.error("Failed to update profile:", error);
+                            return;
+                        }
+
                         setUser(updatedUser);
                     }}
                 />
@@ -244,7 +370,7 @@ function Profile() {
                             <div className="mt-6 grid gap-4 sm:grid-cols-2">
                                 <DetailCard label="Member since" value={joinedAt} />
                                 <DetailCard label="Last active" value={lastActive} />
-                                {isOwnProfile && <DetailCard label="Friends" value={user.friends.length.toString()} />}
+                                {isOwnProfile && <DetailCard label="Friends" value={friends.length.toString()} />}
                                 {isOwnProfile && <DetailCard label="Room" value={user.roomId ?? "No Room Yet"} />}
                             </div>
                         </div>
@@ -264,14 +390,13 @@ function Profile() {
 
                             {isOwnProfile ? (
                                 <div className="mt-6 space-y-4">
-                                    {user.friends.length > 0 ? (
-                                        user.friends.map((friendId) => {
-                                            const friend = getUserById(friendId);
+                                    {friends.length > 0 ? (
+                                        friends.map((friend) => {
 
                                             return (
-                                                <div key={friendId} className="rounded-2xl bg-slate-900/80 p-4">
-                                                    <p className="font-semibold text-white">{friend?.displayName ?? friendId}</p>
-                                                    <p className="mt-1 text-sm text-slate-500">{friend ? `@${friend.username}` : "Friend profile unavailable"}</p>
+                                                <div key={friend.id} className="rounded-2xl bg-slate-900/80 p-4">
+                                                    <p className="font-semibold text-white">{friend.displayName}</p>
+                                                    <p className="mt-1 text-sm text-slate-500">@{friend.username}</p>
                                                 </div>
                                             );
                                         })

@@ -28,7 +28,7 @@ function DashboardHeader() {
         <section className="flex items-center justify-between py-8">
             <div>
                 <h1 className="text-3xl font-bold text-white">
-                    Welcome Back, {currentUser?.displayName ?? "there"}!
+                    Welcome Back, {currentUser?.displayName ?? "VidKeys User"}!
                 </h1>
 
                 <p className="mt-2 text-slate-400">

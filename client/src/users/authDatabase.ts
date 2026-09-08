@@ -1,46 +1,19 @@
-import type { AuthUser } from "./auth";
 import type { User } from "./user";
-import { loadAuthUsers, saveAuthUsers } from "./authStorage";
-import { getAllUsers, createDefaultUser, getUserByUsername } from "./userDatabase";
-
-let auths: AuthUser[] = loadAuthUsers();
+import { supabase } from "../services/supabase";
+import bcrypt from "bcryptjs";
 
 export interface ActionResult {
     success: boolean;
     message: string;
 }
 
-export function getAuthByUserId(userId: string): AuthUser | undefined {
-    if (!userId) {
-        return undefined;
-    }
-
-    return auths.find((auth) => auth.userId === userId);
-}
-
-export function createAuth(auth: AuthUser): ActionResult {
-    if (auths.some((authUser) => authUser.userId === auth.userId)) {
-        return {
-            success: false,
-            message: "User authentication already exists.",
-        };
-    }
-
-    auths.push(auth);
-    saveAuthUsers(auths);
-
-    return {
-        success: true,
-        message: "Authentication created successfully.",
-    };
-}
-
-export function register(
+export async function register(
     username: string,
     displayName: string,
     birthday: string,
     password: string
-): { result: ActionResult; user?: User } {
+): Promise<{ result: ActionResult; user?: User }> {
+
     const trimmedUsername = username.trim();
     const trimmedDisplayName = displayName.trim();
 
@@ -53,7 +26,24 @@ export function register(
         };
     }
 
-    if (getAllUsers().some((user) => user.username === trimmedUsername)) {
+    const { data: existingUser, error: lookupError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", trimmedUsername)
+        .maybeSingle();
+
+    if (lookupError) {
+        console.error("Failed to check username:", lookupError);
+
+        return {
+            result: {
+                success: false,
+                message: "Failed to check username.",
+            },
+        };
+    }
+
+    if (existingUser) {
         return {
             result: {
                 success: false,
@@ -62,38 +52,107 @@ export function register(
         };
     }
 
-    const newUser = createDefaultUser(trimmedUsername, trimmedDisplayName, birthday);
+    const userId = crypto.randomUUID();
 
-    if (!newUser.result.success || !newUser.user) {
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const { error: authError } = await supabase
+        .from("auth_accounts")
+        .insert({
+            id: userId,
+            username: trimmedUsername,
+            password_hash: passwordHash,
+        });
+
+    if (authError) {
+        console.error("Failed to create authentication account:", authError);
+
         return {
-            result: newUser.result,
+            result: {
+                success: false,
+                message: "Failed to create account.",
+            },
         };
     }
 
-    const authResult = createAuth({
-        userId: newUser.user.id,
-        password,
-    });
+    const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+            id: userId,
+            username: trimmedUsername,
+            display_name: trimmedDisplayName,
+            birthday,
+        })
+        .select("*")
+        .single();
 
-    if (!authResult.success) {
+    if (profileError || !profile) {
+        console.error("Failed to create profile:", profileError);
+
+        await supabase
+            .from("auth_accounts")
+            .delete()
+            .eq("id", userId);
+
         return {
-            result: authResult,
+            result: {
+                success: false,
+                message: "Failed to create profile.",
+            },
         };
     }
+
+    const user: User = {
+        id: profile.id,
+        username: profile.username,
+        displayName: profile.display_name,
+        bio: profile.bio,
+        birthday: profile.birthday,
+        avatarId: profile.avatar_id,
+        avatarUrl: profile.avatar_url,
+        uploadedAvatars: [],
+        status: profile.status,
+        createdAt: profile.created_at,
+        updatedAt: profile.updated_at,
+        lastActive: profile.last_active,
+        friends: [],
+        sentRequests: [],
+        receivedRequests: [],
+        blockedUsers: [],
+        reports: [],
+        roomId: null,
+        roomsCreated: profile.rooms_created,
+        roomsVisited: profile.rooms_visited,
+        totalCallMinutes: profile.total_call_minutes,
+        gamesPlayed: profile.games_played,
+        achievementsUnlocked: profile.achievements_unlocked,
+        favoriteTheme: profile.favorite_theme,
+        reputation: profile.reputation,
+    };
 
     return {
         result: {
             success: true,
             message: "Account successfully registered!",
         },
-        user: newUser.user,
+        user,
     };
 }
 
-export function login(username: string, password: string): { result: ActionResult; user?: User } {
-    const user = getUserByUsername(username.trim());
+export async function login(
+    username: string,
+    password: string
+): Promise<{ result: ActionResult; user?: User }> {
 
-    if (!user) {
+    const trimmedUsername = username.trim();
+
+    const { data: auth, error: authError } = await supabase
+        .from("auth_accounts")
+        .select("*")
+        .eq("username", trimmedUsername)
+        .maybeSingle();
+
+    if (authError || !auth) {
         return {
             result: {
                 success: false,
@@ -102,9 +161,12 @@ export function login(username: string, password: string): { result: ActionResul
         };
     }
 
-    const auth = getAuthByUserId(user.id);
+    const passwordMatches = await bcrypt.compare(
+        password,
+        auth.password_hash
+    );
 
-    if (!auth || auth.password !== password) {
+    if (!passwordMatches) {
         return {
             result: {
                 success: false,
@@ -112,6 +174,51 @@ export function login(username: string, password: string): { result: ActionResul
             },
         };
     }
+
+    const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", auth.id)
+        .single();
+
+    if (profileError || !profile) {
+        console.error("Failed to load profile:", profileError);
+
+        return {
+            result: {
+                success: false,
+                message: "Failed to load user profile.",
+            },
+        };
+    }
+
+    const user: User = {
+        id: profile.id,
+        username: profile.username,
+        displayName: profile.display_name,
+        bio: profile.bio,
+        birthday: profile.birthday,
+        avatarId: profile.avatar_id,
+        avatarUrl: profile.avatar_url,
+        uploadedAvatars: [],
+        status: profile.status,
+        createdAt: profile.created_at,
+        updatedAt: profile.updated_at,
+        lastActive: profile.last_active,
+        friends: [],
+        sentRequests: [],
+        receivedRequests: [],
+        blockedUsers: [],
+        reports: [],
+        roomId: null,
+        roomsCreated: profile.rooms_created,
+        roomsVisited: profile.rooms_visited,
+        totalCallMinutes: profile.total_call_minutes,
+        gamesPlayed: profile.games_played,
+        achievementsUnlocked: profile.achievements_unlocked,
+        favoriteTheme: profile.favorite_theme,
+        reputation: profile.reputation,
+    };
 
     return {
         result: {
