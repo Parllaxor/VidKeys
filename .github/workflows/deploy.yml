@@ -35,12 +35,16 @@ jobs:
         run: npm ci
         working-directory: ./client
 
+      - name: Check Supabase environment
+        run: |
+          test -n "$VITE_SUPABASE_URL" && echo "Supabase URL is set" || echo "Supabase URL is MISSING"
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" && echo "Supabase key is set" || echo "Supabase key is MISSING"
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
       - name: Build
         run: npm run build
-        working-directory: ./client
-
-      - name: Create GitHub Pages fallback
-        run: cp dist/index.html dist/404.html
         working-directory: ./client
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
