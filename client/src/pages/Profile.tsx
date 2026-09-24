@@ -86,7 +86,7 @@ function Profile() {
                 birthday: profile.birthday,
                 avatarId: profile.avatar_id,
                 avatarUrl: profile.avatar_url,
-                uploadedAvatars: [],
+                uploadedAvatars: profile.uploaded_avatars ?? [],
                 status: profile.status,
                 createdAt: new Date(profile.created_at).getTime(),
                 updatedAt: new Date(profile.updated_at).getTime(),
@@ -189,6 +189,9 @@ function Profile() {
     const isOwnProfile = !userId || userId === currentUser.id;
     const avatar = getAvatarById(user.avatarId);
     const avatarImage = user.avatarUrl ?? avatar?.image;
+    console.log("Avatar ID:", user.avatarId);
+    console.log("Avatar object:", avatar);
+    console.log("Avatar image:", avatarImage);
     const currentStatus = statusOptions.find((option) => option.value === user.status) ?? statusOptions[0];
     const StatusIcon = currentStatus.icon;
     const joinedAt = new Date(user.createdAt).toLocaleDateString();

@@ -1,3 +1,6 @@
+import defaultAvatar from "../avatars/default.png";
+import robotAvatar from "../avatars/robot.png";
+import foxAvatar from "../avatars/fox.png";
 import pancakesAvatar from "../avatars/pancakes.png";
 
 export interface Avatar {
@@ -10,27 +13,24 @@ export const avatars: Avatar[] = [
     {
         id: "default",
         name: "Default",
-        image: "/avatars/default.png"
+        image: defaultAvatar,
     },
-
     {
         id: "robot",
         name: "Robot",
-        image: "/avatars/robot.png"
+        image: robotAvatar,
     },
-
     {
         id: "fox",
         name: "Fox",
-        image: "/avatars/fox.png"
+        image: foxAvatar,
     },
-
     {
         id: "pancakes",
         name: "Pancakes",
-        image: pancakesAvatar
-    }
-]
+        image: pancakesAvatar,
+    },
+];
 
 export function getAvatarById(id: string) {
     return avatars.find((avatar) => avatar.id === id);

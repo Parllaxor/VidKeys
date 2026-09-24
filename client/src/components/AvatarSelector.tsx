@@ -3,7 +3,7 @@ import { avatars, getAvatarById } from "../users/avatars";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, ImagePlus, Sparkles, Trash2, User as UserIcon } from "lucide-react";
-import { getCurrentUser } from "../users/currentUser";
+import { getCurrentUser, setCurrentUser } from "../users/currentUser";
 import AvatarCropper from "./AvatarCropper";
 import { supabase } from "../services/supabase";
 
@@ -28,7 +28,7 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
     const selectedAvatar = getAvatarById(avatarId) ?? getAvatarById(user.avatarId);
 
     const handleSave = async () => {
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from("profiles")
             .update({
                 avatar_id: avatarId,
@@ -36,7 +36,11 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
                 uploaded_avatars: uploadedAvatars,
                 updated_at: new Date().toISOString(),
             })
-            .eq("id", user.id);
+            .eq("id", user.id)
+            .select("avatar_id");
+
+        console.log("Updated profile:", data);
+        console.log("Supabase avatar update error:", error);
 
         if (error) {
             console.error("Failed to update avatar:", error);
@@ -51,6 +55,7 @@ function AvatarSelector({ user: initialUser, onClose }: Props) {
         };
 
         setUser(updatedUser);
+        setCurrentUser(updatedUser);
 
         if (onClose) {
             onClose();
