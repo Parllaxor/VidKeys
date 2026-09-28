@@ -115,6 +115,7 @@ function RoomPreview({ room, setRoom, presets }: Props) {
             <div className="
                 mt-8
                 flex-1
+                touch-none
                 rounded-2xl
                 border-2
                 border-dashed
@@ -133,7 +134,7 @@ function RoomPreview({ room, setRoom, presets }: Props) {
 
                     setHasDragged(false);
                 }}
-                onMouseMove={(event) => {
+                onPointerMove={(event) => {
                     if (!draggingId) return;
 
                     setHasDragged(true);
@@ -157,7 +158,7 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                         ),
                     });
                 }}
-                onMouseUp={() => {
+                onPointerUp={() => {
                     setDraggingId(null);
                 }} >
 
@@ -201,15 +202,17 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                                                 : ""
                                         }
                                     `}
-                                    onMouseDown={(event) => {
+                                    onPointerDown={(event) => {
                                         event.stopPropagation();
 
                                         setHasDragged(false);
                                         setDraggingId(decoration.id);
 
+                                        const rect = event.currentTarget.getBoundingClientRect();
+
                                         setDragOffset({
-                                            x: event.nativeEvent.offsetX,
-                                            y: event.nativeEvent.offsetY,
+                                            x: event.clientX - rect.left,
+                                            y: event.clientY - rect.top
                                         });
 
                                         setRoom({
@@ -262,25 +265,7 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                                         : ""
                                 }
                             `}
-                            onMouseDown={(event) => {
-                                event.stopPropagation();
-
-                                setHasDragged(false);
-                                setDraggingId(decoration.id);
-
-                                setDragOffset({
-                                    x: event.nativeEvent.offsetX,
-                                    y: event.nativeEvent.offsetY,
-                                });
-
-                                setRoom({
-                                    ...room,
-                                    selectedDecorationId: decoration.id,
-                                });
-                            }}>
-
-                            <div className="absolute"
-                                style={{
+                            style={{
                                     left: decoration.x,
                                     top: decoration.y,
                                     width: decoration.width,
@@ -289,17 +274,36 @@ function RoomPreview({ room, setRoom, presets }: Props) {
                                     transform: `rotate(${decoration.rotation}deg)
                                                 scale(${decoration.scaleX}, ${decoration.scaleY})
                                                 `,
-                                }}>
-                                    <DecorationRenderer decoration={decoration} />
+                            }}
+                            onPointerDown={(event) => {
+                                event.stopPropagation();
+
+                                setHasDragged(false);
+                                setDraggingId(decoration.id);
+
+                                const rect = event.currentTarget.getBoundingClientRect();
+
+                                setDragOffset({
+                                    x: event.clientX - rect.left,
+                                    y: event.clientY - rect.top
+                                });
+
+                                setRoom({
+                                    ...room,
+                                    selectedDecorationId: decoration.id,
+                                });
+                            }}>
                             
-                                    <SelectionOutline 
-                                        decoration={decoration}
-                                        selected={room.selectedDecorationId === decoration.id}
-                                        room={room}
-                                        setRoom={setRoom}
-                                        roomRef={roomRef}
-                                    />
-                            </div>
+                            <DecorationRenderer decoration={decoration} />
+                    
+                            <SelectionOutline 
+                                decoration={decoration}
+                                selected={room.selectedDecorationId === decoration.id}
+                                room={room}
+                                setRoom={setRoom}
+                                roomRef={roomRef}
+                            />
+                            
                         </div>
                     ))}
 
