@@ -23,7 +23,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
     useEffect(() => {
         if (!rotating && !scaling) return;
 
-        function handleMouseMove(event: MouseEvent) {
+        function handlePointerMove(event: PointerEvent) {
             const rect = roomRef.current?.getBoundingClientRect();
 
             if (!rect) return;
@@ -76,18 +76,18 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
             }
         }
 
-        function handleMouseUp() {
+        function handlePointerUp() {
             setRotating(false);
             setScaling(false);
             setScalingHandle(null);
         }
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
         };
     }, [rotating, scaling]);
 
@@ -113,7 +113,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
                     left: "-6px",
                     top: "-6px",
                 }}
-                onMouseDown={(event) => {
+                onPointerDown={(event) => {
                     event.stopPropagation();
                     setScaling(true);
                     setScalingHandle("tl");
@@ -135,7 +135,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
                     right: "-6px",
                     top: "-6px",
                 }}
-                onMouseDown={(event) => {
+                onPointerDown={(event) => {
                     event.stopPropagation();
                     setScaling(true);
                     setScalingHandle("tr");
@@ -157,7 +157,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
                     left: "-6px",
                     bottom: "-6px",
                 }}
-                onMouseDown={(event) => {
+                onPointerDown={(event) => {
                     event.stopPropagation();
                     setScaling(true);
                     setScalingHandle("bl");
@@ -179,7 +179,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
                     right: "-6px",
                     bottom: "-6px",
                 }}
-                onMouseDown={(event) => {
+                onPointerDown={(event) => {
                     event.stopPropagation();
                     setScaling(true);
                     setScalingHandle("br");
@@ -215,7 +215,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
                     top: "-28px",
                     transform: "translateX(-50%)",
                 }}
-                onMouseDown={(event) => {
+                onPointerDown={(event) => {
                     event.stopPropagation();
                     setRotating(true);
                 }}
