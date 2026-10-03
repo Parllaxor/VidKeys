@@ -11,6 +11,7 @@ import type { User } from "../users/user";
 import { supabase } from "../services/supabase";
 
 import type { Message } from "../messages/message";
+import { createNotification } from "../services/notificationService";
 
 function ChatPage() {
     const { friendId } = useParams<{ friendId: string }>();
@@ -116,6 +117,12 @@ function ChatPage() {
             currentUser.id,
             friend.id,
             content
+        );
+
+        await createNotification(
+            friend.id,
+            "message",
+            `${currentUser.displayName} sent you a message.`,
         );
 
         setMessages((currentMessages) => [

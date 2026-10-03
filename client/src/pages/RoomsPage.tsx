@@ -12,17 +12,8 @@ function RoomsPage() {
     const currentUser = getCurrentUser();
     const userId = currentUser?.id;
     const roomStorageKey = userId ? `vidkeys-room-${userId}` : "vidkeys-room-guest";
-    const presetStorageKey = userId ? `vidkeys-presets-${userId}` : "vidkeys-presets-guest";
 
-    const [presets, setPresets] = useState(() => {
-        const savedPresets = localStorage.getItem(presetStorageKey);
-
-        if (savedPresets) {
-            return JSON.parse(savedPresets);
-        }
-
-        return defaultPresets;
-    });
+    const [presets, setPresets] = useState(defaultPresets);
 
     const [room, setRoom] = useState(() => {
         const savedRoom = localStorage.getItem(roomStorageKey);
@@ -35,22 +26,124 @@ function RoomsPage() {
     });
 
     useEffect(() => {
-        localStorage.setItem(roomStorageKey, JSON.stringify(room));
+        if (!currentUser) return;
 
-        if (currentUser && currentUser.roomId !== room.roomName) {
-            supabase
-                .from("profiles")
-                .update({
-                    room_id: room.roomName,
-                    updated_at: new Date().toISOString(),
-                })
-                .eq("id", currentUser.id);
+        async function loadPresets() {
+            const { data, error } = await supabase
+                .from("room_presets")
+                .select("id, name, room_data")
+                .eq("owner_id", currentUser?.id);
+
+            if (error) {
+                console.error("Failed to load presets:", error);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                setPresets(
+                    data.map((preset) => ({
+                        id: preset.id,
+                        name: preset.name,
+                        room: preset.room_data,
+                    }))
+                );
+            }
         }
-    }, [currentUser, room, roomStorageKey]);
+
+        loadPresets();
+    }, [currentUser]);
 
     useEffect(() => {
-        localStorage.setItem(presetStorageKey, JSON.stringify(presets));
-    }, [presets, presetStorageKey]);
+        if (!currentUser) return;
+
+        async function loadRoom() {
+            const { data, error } = await supabase
+                .from("rooms")
+                .select("id, room_data")
+                .eq("owner_id", currentUser?.id)
+                .maybeSingle();
+
+            if (error) {
+                console.error("Failed to load room:", error);
+                return;
+            }
+
+            if (data?.room_data) {
+                setRoom(data.room_data);
+            }
+        }
+
+        loadRoom();
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (!currentUser) return;
+
+        localStorage.setItem(roomStorageKey, JSON.stringify(room));
+
+        async function saveRoom() {
+            const { data: existingRoom, error: findError } = await supabase
+                .from("rooms")
+                .select("id")
+                .eq("owner_id", currentUser?.id)
+                .maybeSingle();
+
+            if (findError) {
+                console.error("Failed to find room:", findError);
+                return;
+            }
+
+            if (existingRoom) {
+                const { error } = await supabase
+                    .from("rooms")
+                    .update({
+                        room_name: room.roomName,
+                        room_data: room,
+                        theme: room.theme,
+                        ambience: room.ambience,
+                        decorations: room.decorations,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq("id", existingRoom.id);
+
+                if (error) {
+                    console.error("Failed to update room:", error);
+                }
+
+            } else {
+                const { data, error } = await supabase
+                    .from("rooms")
+                    .insert({
+                        owner_id: currentUser?.id,
+                        room_name: room.roomName,
+                        room_data: room,
+                        theme: room.theme,
+                        ambience: room.ambience,
+                        decorations: room.decorations,
+                    })
+                    .select("id")
+                    .single();
+
+                if (error) {
+                    console.error("Failed to create room:", error);
+                    return;
+                }
+
+                const { error: profileError } = await supabase
+                    .from("profiles")
+                    .update({
+                        room_id: data.id,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq("id", currentUser?.id);
+
+                if (profileError) {
+                    console.error("Failed to update profile:", profileError);
+                }
+            }
+            }
+        saveRoom();
+    }, [currentUser, room, roomStorageKey]);
 
     if (!currentUser) {
         return (

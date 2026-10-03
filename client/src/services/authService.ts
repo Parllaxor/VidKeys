@@ -165,7 +165,7 @@ export async function login(
             receivedRequests: [],
             blockedUsers: [],
             reports: [],
-            roomId: null,
+            roomId: profileData.room_id,
             roomsCreated: profileData.rooms_created,
             roomsVisited: profileData.rooms_visited,
             totalCallMinutes: profileData.total_call_minutes,

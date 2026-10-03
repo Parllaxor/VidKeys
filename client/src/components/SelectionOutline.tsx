@@ -102,16 +102,16 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
             <div
                 className="
                     absolute
-                    w-3
-                    h-3
+                    w-6
+                    h-6
                     bg-cyan-400
                     border
                     border-white
                     cursor-nwse-resize
                 "
                 style={{
-                    left: "-6px",
-                    top: "-6px",
+                    left: "-12px",
+                    top: "-12px",
                 }}
                 onPointerDown={(event) => {
                     event.stopPropagation();
@@ -124,16 +124,16 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
             <div
                 className="
                     absolute
-                    w-3
-                    h-3
+                    w-6
+                    h-6
                     bg-cyan-400
                     border
                     border-white
                     cursor-nesw-resize
                 "
                 style={{
-                    right: "-6px",
-                    top: "-6px",
+                    right: "-12px",
+                    top: "-12px",
                 }}
                 onPointerDown={(event) => {
                     event.stopPropagation();
@@ -146,16 +146,16 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
             <div
                 className="
                     absolute
-                    w-3
-                    h-3
+                    w-6
+                    h-6
                     bg-cyan-400
                     border
                     border-white
                     cursor-nesw-resize
                 "
                 style={{
-                    left: "-6px",
-                    bottom: "-6px",
+                    left: "-12px",
+                    bottom: "-12px",
                 }}
                 onPointerDown={(event) => {
                     event.stopPropagation();
@@ -168,16 +168,16 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
             <div
                 className="
                     absolute
-                    w-3
-                    h-3
+                    w-6
+                    h-6
                     bg-cyan-400
                     border
                     border-white
                     cursor-nwse-resize
                 "
                 style={{
-                    right: "-6px",
-                    bottom: "-6px",
+                    right: "-12px",
+                    bottom: "-12px",
                 }}
                 onPointerDown={(event) => {
                     event.stopPropagation();
@@ -202,8 +202,8 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
             <div
                 className="
                     absolute
-                    w-4
-                    h-4
+                    w-8
+                    h-8
                     rounded-full
                     bg-cyan-400
                     border-2
@@ -212,7 +212,7 @@ function SelectionOutline({ decoration, selected, room, setRoom, roomRef }: Prop
                 "
                 style={{
                     left: "50%",
-                    top: "-28px",
+                    top: "-36px",
                     transform: "translateX(-50%)",
                 }}
                 onPointerDown={(event) => {

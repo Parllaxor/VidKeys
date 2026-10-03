@@ -1,6 +1,9 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { supabase } from "../services/supabase";
+import { getCurrentUser } from "../users/currentUser";
+
 import type { Room } from "../room/room";
 import type { RoomPreset } from "../room/presets";
 
@@ -83,7 +86,7 @@ function PresetSelector({ room, setRoom, presets, setPresets }: Props) {
         )}
 
         <button
-            onClick={() => {
+            onClick={async () => {
                 let name = prompt("Preset Name")?.trim();
 
                 if (presets.some((preset) => preset.name === name)) {
@@ -111,10 +114,43 @@ function PresetSelector({ room, setRoom, presets, setPresets }: Props) {
                     room: structuredClone(room),
                 };
 
-                setPresets([
-                    ...presets,
-                    newPreset,
-                ]);
+                const currentUser = getCurrentUser();
+
+                if (!currentUser) {
+                    alert("Please log in to save your presets.");
+                    return;
+                }
+
+                const { error } = await supabase
+                    .from("room_presets")
+                    .insert({
+                        owner_id: currentUser.id,
+                        name: newPreset.name,
+                        room_data: newPreset.room,
+                    });
+
+                    if (error) {
+                        console.error("Failed to save preset:", error);
+                        alert("Failed to save preset.");
+                        return;
+                    }
+
+                    const { error: profileError } = await supabase
+                        .from("profiles")
+                        .update({
+                            rooms_created: (currentUser.roomsCreated ?? 0) + 1,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq("id", currentUser.id);
+
+                    if (profileError) {
+                        console.error("Failed to update profile:", profileError);
+                    }
+
+                    setPresets([
+                        ...presets,
+                        newPreset,
+                    ]);
             }}
             className="
                 mt-4

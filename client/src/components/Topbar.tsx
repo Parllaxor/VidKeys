@@ -1,10 +1,14 @@
 import { getCurrentUser } from "../users/currentUser";
 import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Bell } from "lucide-react";
+import NotificationPanel from "./NotificationPanel";
 
 function Topbar() {
 
     const user = getCurrentUser();
     const location = useLocation();
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
 
     if (!user) {
         return <div>ERROR: User not found</div>;
@@ -43,9 +47,24 @@ function Topbar() {
                 </h1>
             </div>
 
-            <div className="hidden text-slate-400 sm:block">
-                Welcome, {user.displayName}
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={() => setNotificationsOpen(true)}
+                    className="text-slate-400 hover:text-white transition"
+                    aria-label="Notifications"
+                >
+                    <Bell size={20} />
+                </button>
+
+                <div className="hidden text-slate-400 sm:block">
+                    Welcome, {user.displayName}
+                </div>
             </div>
+
+            <NotificationPanel
+                onClose={() => setNotificationsOpen(false)}
+                isOpen={notificationsOpen}
+            />
         </header>
     );
 }
